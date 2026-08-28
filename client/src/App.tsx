@@ -36,7 +36,7 @@ export default function Dashboard() {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex items-center gap-2 text-primary font-bold text-lg animate-bounce">
           <Dog className="w-8 h-8" />
-          <span>Loading PawStation Telemetry...</span>
+          <span>Loading StraySafe Telemetry...</span>
         </div>
       </div>
     );
