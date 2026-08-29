@@ -1,34 +1,34 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@layer base {
+  :root {
+    --background: 40 60% 98%;      /* Soft cream background */
+    --foreground: 25 60% 18%;      /* Deep chocolate brown text */
+    
+    --card: 40 50% 96%;            /* Warm card background */
+    --card-foreground: 25 60% 18%; /* Dark brown text inside cards */
+    
+    --primary: 43 96% 56%;         /* Bright warm yellow (#F2B824) */
+    --primary-foreground: 25 65% 15%; /* Contrast dark brown text on yellow */
+    
+    --secondary: 25 55% 24%;       /* Warm chocolate brown (#5C3112) */
+    --secondary-foreground: 40 60% 98%;
+    
+    --border: 40 30% 88%;          /* Subtle warm border */
+    --ring: 43 96% 56%;
+  }
 
-:root {
-  --background: 38 40% 98%;
-  --foreground: 222.2 84% 4.9%;
-
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-
-  --primary: 38 92% 50%;
-  --primary-foreground: 0 0% 100%;
-
-  --secondary: 38 60% 94%;
-  --secondary-foreground: 38 92% 30%;
-
-  --muted: 38 30% 96%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-
-  --accent: 38 60% 92%;
-  --accent-foreground: 38 92% 30%;
-
-  --border: 38 30% 90%;
-  --input: 38 30% 90%;
-  --ring: 38 92% 50%;
-
-  --radius: 1rem;
+  .dark {
+    --background: 25 50% 10%;      /* Dark chocolate background */
+    --foreground: 40 60% 95%;      /* Cream text */
+    
+    --card: 25 45% 14%;            /* Slightly lighter dark brown cards */
+    --card-foreground: 40 60% 95%;
+    
+    --primary: 43 96% 56%;         /* Bright yellow highlight */
+    --primary-foreground: 25 65% 10%;
+    
+    --border: 25 35% 22%;
+    --ring: 43 96% 56%;
+  }
 }
 
 body {
