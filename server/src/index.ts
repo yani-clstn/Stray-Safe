@@ -1,5 +1,7 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import { Pool } from "pg";
 
 const app = express();
 
@@ -15,20 +17,49 @@ app.use(
 
 app.use(express.json());
 
-// Sample station data.
-app.get("/api/stations/station-01", (_req, res) => {
-  res.json({
-    id: "station-01",
-    name: "PawStation Alpha",
-    location: "Central Park Gate 3",
-    foodLevel: 78,
-    waterLevel: 42,
-    batteryVoltage: 12.6,
-    solarPercent: 89,
-    status: "online",
-  });
+// Initialize PostgreSQL Connection Pool with flexible SSL for cloud DBs
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl:
+    process.env.NODE_ENV === "production" ||
+    process.env.DATABASE_URL?.includes("neon.tech") ||
+    process.env.DATABASE_URL?.includes("supabase")
+      ? { rejectUnauthorized: false }
+      : false,
 });
 
+// Endpoint for station telemetry
+app.get("/api/stations/station-01", async (_req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT id, name, location, foodlevel, waterlevel, batteryvoltage, solarpercent FROM stations WHERE id = $1",
+      ["station-01"]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Station not found" });
+    }
+
+    const station = result.rows[0];
+
+    // Map database lowercase columns to camelCase expected by frontend
+    res.json({
+      id: station.id,
+      name: station.name,
+      location: station.location,
+      foodLevel: Number(station.foodlevel) || 0,
+      waterLevel: Number(station.waterlevel) || 0,
+      batteryVoltage: Number(station.batteryvoltage) || 0,
+      solarPercent: Number(station.solarpercent) || 0,
+      status: "online",
+    });
+  } catch (error) {
+    console.error("Error fetching station data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// Endpoint for weekly analytics
 app.get("/api/stations/station-01/analytics", (_req, res) => {
   res.json({
     weeklyVisits: [
