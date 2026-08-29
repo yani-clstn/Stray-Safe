@@ -7,7 +7,8 @@ import {
   Battery, 
   Wifi, 
   BellRing,
-  Heart
+  Heart,
+  RefreshCw
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -21,16 +22,22 @@ const FETCH_URL = `${API_BASE_URL}/api/stations/station-01`;
 const ANALYTICS_URL = `${API_BASE_URL}/api/stations/station-01/analytics`;
 
 export default function Dashboard() {
-  const { data: station, isLoading } = useQuery({
+  const { data: station, isLoading, isFetching: isFetchingStation, refetch: refetchStation } = useQuery({
     queryKey: ["station"],
     queryFn: () => fetch(FETCH_URL).then((res) => res.json()),
-    refetchInterval: 5000,
   });
 
-  const { data: analytics } = useQuery({
+  const { data: analytics, isFetching: isFetchingAnalytics, refetch: refetchAnalytics } = useQuery({
     queryKey: ["analytics"],
     queryFn: () => fetch(ANALYTICS_URL).then((res) => res.json()),
   });
+
+  const isRefreshing = isFetchingStation || isFetchingAnalytics;
+
+  const handleManualRefresh = () => {
+    refetchStation();
+    refetchAnalytics();
+  };
 
   if (isLoading) {
     return (
@@ -61,13 +68,26 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <Badge variant="outline" className="px-3 py-1.5 rounded-full bg-card gap-2 text-xs font-semibold">
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-          </span>
-          <Wifi className="w-3.5 h-3.5 text-emerald-500" /> Station Online
-        </Badge>
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleManualRefresh}
+            disabled={isRefreshing}
+            className="rounded-full gap-2 text-xs font-semibold shadow-sm"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
+            {isRefreshing ? "Refreshing..." : "Refresh"}
+          </Button>
+
+          <Badge variant="outline" className="px-3 py-1.5 rounded-full bg-card gap-2 text-xs font-semibold">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+            <Wifi className="w-3.5 h-3.5 text-emerald-500" /> Station Online
+          </Badge>
+        </div>
       </header>
 
       <main className="max-w-7xl mx-auto space-y-8">
