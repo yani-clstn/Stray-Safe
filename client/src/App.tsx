@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ThemeToggle } from "./components/ThemeToggle";
+import { useState } from "react";
 import {
   PawPrint,
   Utensils,
@@ -10,6 +11,8 @@ import {
   BellRing,
   Heart,
   RefreshCw,
+  HeartHandshake,
+  X,
 } from "lucide-react";
 import {
   BarChart,
@@ -36,6 +39,9 @@ const FETCH_URL = `${API_BASE_URL}/api/stations/station-01`;
 const ANALYTICS_URL = `${API_BASE_URL}/api/stations/station-01/analytics`;
 
 export default function Dashboard() {
+  // Move all hooks to the top level of the component
+  const [isDonateOPEN, setIsDonateOPEN] = useState(false);
+
   const {
     data: station,
     isLoading,
@@ -44,6 +50,9 @@ export default function Dashboard() {
   } = useQuery({
     queryKey: ["station"],
     queryFn: () => fetch(FETCH_URL).then((res) => res.json()),
+    refetchInterval: false,
+    refetchOnWindowFocus: false,
+    staleTime: Infinity,
   });
 
   const {
@@ -53,6 +62,9 @@ export default function Dashboard() {
   } = useQuery({
     queryKey: ["analytics"],
     queryFn: () => fetch(ANALYTICS_URL).then((res) => res.json()),
+    refetchInterval: false,
+    refetchOnWindowFocus: false,
+    staleTime: Infinity,
   });
 
   const isRefreshing = isFetchingStation || isFetchingAnalytics;
@@ -60,6 +72,12 @@ export default function Dashboard() {
   const handleManualRefresh = () => {
     refetchStation();
     refetchAnalytics();
+  };
+
+  const DONATION_URL = "https://www.buymeacoffee.com/straysafe";
+
+  const handleDonateRedirect = () => {
+    window.open(DONATION_URL, "_blank", "noopener,noreferrer");
   };
 
   if (isLoading) {
@@ -88,14 +106,25 @@ export default function Dashboard() {
             <p className="text-sm text-muted-foreground font-medium">
               Station:{" "}
               <span className="text-foreground font-semibold">
-                {station?.name}
+                {station?.name || "Station 01"}
               </span>{" "}
-              ({station?.location})
+              ({station?.location || "Main Gate"})
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Donation Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsDonateOPEN(true)}
+            className="rounded-2xl h-11 font-bold shadow-md bg-amber-600 hover:bg-amber-700 text-white flex items-center gap-2"
+          >
+            <HeartHandshake className="w-5 h-5" />
+            Donate Cat Food Now!
+          </Button>
+
           <Button
             variant="outline"
             size="sm"
@@ -124,6 +153,53 @@ export default function Dashboard() {
         </div>
       </header>
 
+      {/* Donation Modal / Dialog */}
+      {isDonateOPEN && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-card text-card-foreground border border-border rounded-3xl p-6 max-w-md w-full shadow-2xl relative space-y-4">
+            <button
+              onClick={() => setIsDonateOPEN(false)}
+              className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-primary/20 text-primary rounded-2xl">
+                <HeartHandshake className="w-7 h-7"/>
+              </div>
+              <h2 className="text-xl font-bold">Donate to Stray Safe</h2>
+            </div>
+
+            <p className="text-sm text-muted-foreground">
+              Your donation directly funds cat & dog food refills and keeps automated feeding stations powered and operational.
+            </p>
+
+            <div className="p-4 bg-muted/60 rounded-2xl border space-y-2">
+              <p className="text-xs space-y-1 text-foreground">
+                Support automated feeding and water refills across stations.
+              </p>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsDonateOPEN(false)}
+                className="flex-1 rounded-2xl h-11"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleDonateRedirect}
+                className="flex-1 rounded-2xl h-11 font-bold bg-primary text-primary-foreground"
+              >
+                Donate to Stray Safe Now!
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <main className="max-w-7xl mx-auto space-y-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           <Card className="rounded-3xl shadow-sm border-amber-100">
@@ -137,10 +213,10 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-black mb-3">
-                {station?.foodLevel}%
+                {station?.foodLevel ?? 0}%
               </div>
               <Progress
-                value={station?.foodLevel}
+                value={station?.foodLevel ?? 0}
                 className="h-2.5 bg-muted [&>div]:bg-primary"
               />
             </CardContent>
@@ -157,10 +233,10 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-black mb-3">
-                {station?.waterLevel}%
+                {station?.waterLevel ?? 0}%
               </div>
               <Progress
-                value={station?.waterLevel}
+                value={station?.waterLevel ?? 0}
                 className="h-2.5 bg-muted [&>div]:bg-blue-500"
               />
             </CardContent>
@@ -177,7 +253,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-black mb-1">
-                {station?.batteryVoltage}V
+                {station?.batteryVoltage ?? 0}V
               </div>
               <p className="text-xs font-semibold text-emerald-600">
                 Optimal Charge
@@ -196,7 +272,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-black mb-1">
-                {station?.solarPercent}%
+                {station?.solarPercent ?? 0}%
               </div>
               <p className="text-xs font-semibold text-orange-500">
                 Generating Power
