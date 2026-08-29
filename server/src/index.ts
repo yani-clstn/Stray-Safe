@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { Pool } from "pg";
@@ -7,10 +8,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Initialize PostgreSQL Connection Pool
+// Initialize PostgreSQL Connection Pool with flexible SSL for cloud DBs
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
+  ssl:
+    process.env.NODE_ENV === "production" ||
+    process.env.DATABASE_URL?.includes("neon.tech") ||
+    process.env.DATABASE_URL?.includes("supabase")
+      ? { rejectUnauthorized: false }
+      : false,
 });
 
 // Endpoint for station telemetry
