@@ -16,8 +16,9 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-const FETCH_URL = "http://localhost:3000/api/stations/station-01";
-const ANALYTICS_URL = "http://localhost:3000/api/stations/station-01/analytics";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+const FETCH_URL = `${API_BASE_URL}/api/stations/station-01`;
+const ANALYTICS_URL = `${API_BASE_URL}/api/stations/station-01/analytics`;
 
 export default function Dashboard() {
   const { data: station, isLoading } = useQuery({
