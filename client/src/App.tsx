@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { 
-  Dog, 
+  PawPrint, 
   Utensils, 
   Droplets, 
   Sun, 
@@ -43,7 +43,7 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex items-center gap-2 text-primary font-bold text-lg animate-bounce">
-          <Dog className="w-8 h-8" />
+          <PawPrint className="w-8 h-8" />
           <span>Loading StraySafe Telemetry...</span>
         </div>
       </div>
@@ -56,7 +56,7 @@ export default function Dashboard() {
       <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b mb-8 gap-4">
         <div className="flex items-center gap-3">
           <div className="p-3 bg-primary text-primary-foreground rounded-2xl shadow-md">
-            <Dog className="w-8 h-8" />
+            <PawPrint className="w-8 h-8" />
           </div>
           <div>
             <h1 className="text-2xl font-black tracking-tight flex items-center gap-2">
