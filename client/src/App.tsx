@@ -34,7 +34,9 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+// Use relative path ("") in Vercel, and localhost in development
+const API_BASE_URL = import.meta.env.PROD ? "" : "http://localhost:3000";
+
 const FETCH_URL = `${API_BASE_URL}/api/stations/station-01`;
 const ANALYTICS_URL = `${API_BASE_URL}/api/stations/station-01/analytics`;
 

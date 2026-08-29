@@ -3,7 +3,16 @@ import cors from "cors";
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://stray-safe-telemetry.vercel.app",
+    ],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 // Sample station data.
@@ -16,7 +25,7 @@ app.get("/api/stations/station-01", (_req, res) => {
     waterLevel: 42,
     batteryVoltage: 12.6,
     solarPercent: 89,
-    status: "online"
+    status: "online",
   });
 });
 
@@ -30,7 +39,7 @@ app.get("/api/stations/station-01/analytics", (_req, res) => {
       { day: "Fri", visits: 28 },
       { day: "Sat", visits: 34 },
       { day: "Sun", visits: 25 },
-    ]
+    ],
   });
 });
 
