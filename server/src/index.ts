@@ -5,7 +5,16 @@ import { Pool } from "pg";
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://stray-safe-telemetry.vercel.app",
+    ],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 // Initialize PostgreSQL Connection Pool with flexible SSL for cloud DBs
