@@ -7,3 +7,4 @@
 *.pem
 secrets.h
 
+node_modules/
