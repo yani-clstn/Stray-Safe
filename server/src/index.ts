@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Sample station data
+// Sample station data.
 app.get("/api/stations/station-01", (_req, res) => {
   res.json({
     id: "station-01",
