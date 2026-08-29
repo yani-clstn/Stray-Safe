@@ -1,16 +1,3 @@
-# Dependencies
-node_modules/
-.pnp
-.pnp.js
-
-# Production & Build Outputs
-/dist
-/build
-/out
-/.next
-/.vercel
-*.tsbuildinfo
-
 # Environment Variables & Secrets (CRITICAL)
 .env
 .env.local
@@ -20,29 +7,3 @@ node_modules/
 *.pem
 secrets.h
 
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-*.log
-
-# Editor & System Files
-.DS_Store
-.idea/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-.vscode/*
-!.vscode/extensions.json
-
-# Drizzle & DB Artifacts (Keep schema, ignore temp/cache)
-drizzle/meta/
-
-# PlatformIO / ESP32 Firmware Build Artifacts
-.pio/
-.pioenvs/
-.piolibdeps/
