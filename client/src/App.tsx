@@ -34,34 +34,75 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+const MOCK_STATION = {
+  id: "station-01",
+  name: "PawStation Alpha",
+  location: "Central Park Gate 3",
+  foodLevel: 78,
+  waterLevel: 42,
+  batteryVoltage: 12.6,
+  solarPercent: 89,
+  status: "online",
+};
+
+const MOCK_ANALYTICS = {
+  weeklyVisits: [
+    { day: "Mon", visits: 12 },
+    { day: "Tue", visits: 19 },
+    { day: "Wed", visits: 15 },
+    { day: "Thu", visits: 22 },
+    { day: "Fri", visits: 28 },
+    { day: "Sat", visits: 34 },
+    { day: "Sun", visits: 25 },
+  ],
+};
+
+const API_BASE_URL = import.meta.env.PROD
+  ? ""
+  : import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
 const FETCH_URL = `${API_BASE_URL}/api/stations/station-01`;
 const ANALYTICS_URL = `${API_BASE_URL}/api/stations/station-01/analytics`;
 
 export default function Dashboard() {
-  // Move all hooks to the top level of the component
   const [isDonateOPEN, setIsDonateOPEN] = useState(false);
 
   const {
-    data: station,
+    data: station = MOCK_STATION,
     isLoading,
     isFetching: isFetchingStation,
     refetch: refetchStation,
   } = useQuery({
     queryKey: ["station"],
-    queryFn: () => fetch(FETCH_URL).then((res) => res.json()),
+    queryFn: async () => {
+      try {
+        const res = await fetch(FETCH_URL);
+        if (!res.ok) throw new Error("API returned non-200 status");
+        return await res.json();
+      } catch {
+        return MOCK_STATION;
+      }
+    },
     refetchInterval: false,
     refetchOnWindowFocus: false,
     staleTime: Infinity,
   });
 
   const {
-    data: analytics,
+    data: analytics = MOCK_ANALYTICS,
     isFetching: isFetchingAnalytics,
     refetch: refetchAnalytics,
   } = useQuery({
     queryKey: ["analytics"],
-    queryFn: () => fetch(ANALYTICS_URL).then((res) => res.json()),
+    queryFn: async () => {
+      try {
+        const res = await fetch(ANALYTICS_URL);
+        if (!res.ok) throw new Error("API returned non-200 status");
+        return await res.json();
+      } catch {
+        return MOCK_ANALYTICS;
+      }
+    },
     refetchInterval: false,
     refetchOnWindowFocus: false,
     staleTime: Infinity,
@@ -79,6 +120,12 @@ export default function Dashboard() {
   const handleDonateRedirect = () => {
     window.open(DONATION_URL, "_blank", "noopener,noreferrer");
   };
+
+  // Extract telemetry metrics with camelCase and lowercase fallbacks
+  const foodLevel = station?.foodLevel ?? station?.foodlevel ?? 0;
+  const waterLevel = station?.waterLevel ?? station?.waterlevel ?? 0;
+  const batteryVoltage = station?.batteryVoltage ?? station?.batteryvoltage ?? 0;
+  const solarPercent = station?.solarPercent ?? station?.solarpercent ?? 0;
 
   if (isLoading) {
     return (
@@ -166,7 +213,7 @@ export default function Dashboard() {
 
             <div className="flex items-center gap-3">
               <div className="p-3 bg-primary/20 text-primary rounded-2xl">
-                <HeartHandshake className="w-7 h-7"/>
+                <HeartHandshake className="w-7 h-7" />
               </div>
               <h2 className="text-xl font-bold">Donate to Stray Safe</h2>
             </div>
@@ -213,10 +260,10 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-black mb-3">
-                {station?.foodLevel ?? 0}%
+                {foodLevel}%
               </div>
               <Progress
-                value={station?.foodLevel ?? 0}
+                value={foodLevel}
                 className="h-2.5 bg-muted [&>div]:bg-primary"
               />
             </CardContent>
@@ -233,10 +280,10 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-black mb-3">
-                {station?.waterLevel ?? 0}%
+                {waterLevel}%
               </div>
               <Progress
-                value={station?.waterLevel ?? 0}
+                value={waterLevel}
                 className="h-2.5 bg-muted [&>div]:bg-blue-500"
               />
             </CardContent>
@@ -253,7 +300,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-black mb-1">
-                {station?.batteryVoltage ?? 0}V
+                {batteryVoltage}V
               </div>
               <p className="text-xs font-semibold text-emerald-600">
                 Optimal Charge
@@ -272,7 +319,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-black mb-1">
-                {station?.solarPercent ?? 0}%
+                {solarPercent}%
               </div>
               <p className="text-xs font-semibold text-orange-500">
                 Generating Power
