@@ -34,7 +34,34 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+// Mock fallback data for preview when backend API is unavailable
+const MOCK_STATION = {
+  id: "station-01",
+  name: "PawStation Alpha",
+  location: "Central Park Gate 3",
+  foodLevel: 78,
+  waterLevel: 42,
+  batteryVoltage: 12.6,
+  solarPercent: 89,
+  status: "online",
+};
+
+const MOCK_ANALYTICS = {
+  weeklyVisits: [
+    { day: "Mon", visits: 12 },
+    { day: "Tue", visits: 19 },
+    { day: "Wed", visits: 15 },
+    { day: "Thu", visits: 22 },
+    { day: "Fri", visits: 28 },
+    { day: "Sat", visits: 34 },
+    { day: "Sun", visits: 25 },
+  ],
+};
+
+const API_BASE_URL = import.meta.env.PROD
+  ? ""
+  : import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
 const FETCH_URL = `${API_BASE_URL}/api/stations/station-01`;
 const ANALYTICS_URL = `${API_BASE_URL}/api/stations/station-01/analytics`;
 
@@ -42,25 +69,41 @@ export default function Dashboard() {
   const [isDonateOPEN, setIsDonateOPEN] = useState(false);
 
   const {
-    data: station,
+    data: station = MOCK_STATION,
     isLoading,
     isFetching: isFetchingStation,
     refetch: refetchStation,
   } = useQuery({
     queryKey: ["station"],
-    queryFn: () => fetch(FETCH_URL).then((res) => res.json()),
+    queryFn: async () => {
+      try {
+        const res = await fetch(FETCH_URL);
+        if (!res.ok) throw new Error("API returned non-200 status");
+        return await res.json();
+      } catch {
+        return MOCK_STATION;
+      }
+    },
     refetchInterval: false,
     refetchOnWindowFocus: false,
     staleTime: Infinity,
   });
 
   const {
-    data: analytics,
+    data: analytics = MOCK_ANALYTICS,
     isFetching: isFetchingAnalytics,
     refetch: refetchAnalytics,
   } = useQuery({
     queryKey: ["analytics"],
-    queryFn: () => fetch(ANALYTICS_URL).then((res) => res.json()),
+    queryFn: async () => {
+      try {
+        const res = await fetch(ANALYTICS_URL);
+        if (!res.ok) throw new Error("API returned non-200 status");
+        return await res.json();
+      } catch {
+        return MOCK_ANALYTICS;
+      }
+    },
     refetchInterval: false,
     refetchOnWindowFocus: false,
     staleTime: Infinity,
@@ -177,7 +220,7 @@ export default function Dashboard() {
             </div>
 
             <p className="text-sm text-muted-foreground">
-              Your donation directly funds cat & dog food refills and keeps automated feeding stations powered and operational.
+              Your donation directly funds cat & dog food refills and keeps automated feeding stations powered and operational!
             </p>
 
             <div className="p-4 bg-muted/60 rounded-2xl border space-y-2">
