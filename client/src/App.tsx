@@ -220,7 +220,7 @@ export default function Dashboard() {
             </div>
 
             <p className="text-sm text-muted-foreground">
-              Your donation directly funds cat & dog food refills and keeps automated feeding stations powered and operational.
+              Your donation directly funds cat & dog food refills and keeps automated feeding stations powered and operational!
             </p>
 
             <div className="p-4 bg-muted/60 rounded-2xl border space-y-2">
