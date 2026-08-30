@@ -34,6 +34,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
+// Mock fallback data for preview when backend API is unavailable
 const MOCK_STATION = {
   id: "station-01",
   name: "PawStation Alpha",
