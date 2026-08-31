@@ -19,7 +19,6 @@ import {
   PackageCheck,
   TrendingUp,
   Lock,
-  Building2,
   Activity,
 } from "lucide-react";
 import {
@@ -79,7 +78,7 @@ const MOCK_DONATION_ANALYTICS = {
     },
     {
       id: 2,
-      donor: "Anonymouse Student",
+      donor: "Anonymous Student",
       amount: "5.0 kg Cat Food",
       date: "Yesterday",
     },
