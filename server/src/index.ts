@@ -32,7 +32,7 @@ const pool = new Pool({
 app.get("/api/stations/station-01", async (_req, res) => {
   try {
     const result = await pool.query(
-      "SELECT id, name, location, foodlevel, waterlevel, batteryvoltage, solarpercent FROM stations WHERE id = $1",
+      "SELECT id, name, location, foodlevel, waterlevel, batteryPercentage, solarVoltage FROM stations WHERE id = $1",
       ["station-01"]
     );
 
@@ -49,8 +49,8 @@ app.get("/api/stations/station-01", async (_req, res) => {
       location: station.location,
       foodLevel: Number(station.foodlevel) || 0,
       waterLevel: Number(station.waterlevel) || 0,
-      batteryVoltage: Number(station.batteryvoltage) || 0,
-      solarPercent: Number(station.solarpercent) || 0,
+      batteryPercentage: Number(station.batteryPercentage) || 0,
+      solarVoltage: Number(station.solarVoltage) || 0,
       status: "online",
     });
   } catch (error) {

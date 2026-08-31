@@ -83,8 +83,8 @@ The ESP32 never talks to the database directly — it only ever calls your API. 
      "stationId": "station-01",
      "foodLevel": 38,
      "waterLevel": 64,
-     "solarPercent": 30,
-     "batteryVoltage": 12.6,
+     "solarVoltage": 30,
+     "batteryPercentage": 12.6,
      "motionEvent": false,
      "timestamp": "2026-08-28T10:15:00Z"
    }
@@ -114,8 +114,8 @@ export const readings = pgTable("readings", {
   stationId: text("station_id").references(() => stations.id),
   foodLevel: integer("food_level"),
   waterLevel: integer("water_level"),
-  solarPercent: integer("solar_percent"),
-  batteryVoltage: real("battery_voltage"),
+  solarVoltage: integer("solar_percent"),
+  batteryPercentage: real("battery_percentage"),
   motionEvent: boolean("motion_event").default(false),
   recordedAt: timestamp("recorded_at").notNull(),
 });
@@ -167,7 +167,7 @@ Key routes:
 | `PUT /api/stations/:id/schedule` | Caretaker edits the schedule | User session |
 | `GET /api/stations/:id/alerts` | Dashboard fetches unresolved alerts | User session |
 
-Add a small piece of **server-side logic on every `POST /api/readings`**: if `foodLevel < 20` or `waterLevel < 20` or `batteryVoltage` below a threshold, insert a row into `alerts` (only if one isn't already open, to avoid spamming). This is what powers the notification card in your wireframe.
+Add a small piece of **server-side logic on every `POST /api/readings`**: if `foodLevel < 20` or `waterLevel < 20` or `batteryPercentage` below a threshold, insert a row into `alerts` (only if one isn't already open, to avoid spamming). This is what powers the notification card in your wireframe.
 
 ---
 
@@ -185,7 +185,7 @@ Add a small piece of **server-side logic on every `POST /api/readings`**: if `fo
 
 - **Weekly visits chart**: `GROUP BY date_trunc('day', recorded_at)` on `feeding_events` where `triggered_by = 'motion'`, last 7 days — feed this array into Recharts `<BarChart>`.
 - **Food/water trend**: line chart of `readings.foodLevel`/`waterLevel` over time, useful for spotting a consumption pattern (e.g., "empties faster on weekends").
-- **Solar/battery health**: line chart of `solarPercent`/`batteryVoltage` over a day, useful for tuning panel angle or spotting a failing battery.
+- **Solar/battery health**: line chart of `solarVoltage`/`batteryPercentage` over a day, useful for tuning panel angle or spotting a failing battery.
 - **"Online/Offline" status**: derive this in the API, not stored as a column — if the latest reading's `recordedAt` is older than ~10 minutes, mark the station offline. A daily Vercel Cron job (see below) can also sweep for stale stations and raise an "offline" alert.
 - **Daily summary job** (optional, nice for a capstone defense): a Vercel Cron job once a day that computes yesterday's totals (visits, avg food level, feeding events) into a `daily_summaries` table, so your "Reports" page loads instantly instead of aggregating raw rows every time.
 

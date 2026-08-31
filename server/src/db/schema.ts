@@ -13,8 +13,8 @@ export const readings = pgTable("readings", {
   stationId: text("station_id").references(() => stations.id),
   foodLevel: integer("food_level").notNull(), // Percentage 0-100%
   waterLevel: integer("water_level").notNull(), // Percentage 0-100%
-  solarPercent: integer("solar_percent").notNull(),
-  batteryVoltage: real("battery_voltage").notNull(),
+  solarVoltage: integer("solar_voltage").notNull(),
+  batteryPercentage: real("battery_percentage").notNull(),
   motionEvent: boolean("motion_event").default(false),
   recordedAt: timestamp("recorded_at").defaultNow(),
 });

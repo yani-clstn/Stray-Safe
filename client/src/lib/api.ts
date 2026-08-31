@@ -31,8 +31,8 @@ export type Reading = {
   stationId: string;
   foodLevel: number;
   waterLevel: number;
-  solarPercent: number | null;
-  batteryVoltage: number | null;
+  solarVoltage: number | null;
+  batteryPercentage: number | null;
   motionEvent: boolean;
   recordedAt: string;
   status: "online" | "offline";
@@ -68,8 +68,8 @@ export type AnalyticsResponse = {
     recordedAt: string;
     foodLevel: number;
     waterLevel: number;
-    solarPercent: number | null;
-    batteryVoltage: number | null;
+    solarVoltage: number | null;
+    batteryPercentage: number | null;
   }[];
 };
 
