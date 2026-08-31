@@ -2,8 +2,6 @@
 
 An end-to-end build plan: hardware → firmware → database → backend API → web dashboard → analytics → deployment.
 
-Since you already built [Offerly](#) with **React + Vite + TypeScript + Neon + Drizzle + Hono**, deployed as two separate Vercel projects, this plan reuses that exact stack. Less to learn, and you already know the deployment pattern.
-
 ---
 
 ## 1. Tech Stack at a Glance
@@ -16,15 +14,15 @@ Since you already built [Offerly](#) with **React + Vite + TypeScript + Neon + D
 | Actuators | SG90/MG996R servo (food gate), 5V mini submersible pump, buzzer/LED | — |
 | Power | Solar panel + PWM/MPPT charge controller + 12V Li-ion or SLA battery, buck converter down to 5V for the ESP32 | — |
 | Connectivity | Wi-Fi (ESP32 built-in), **HTTPS REST calls** (not MQTT) | Simplest to pair with a serverless backend — no broker to host |
-| Backend | **Hono** (TypeScript, same as Offerly) | You already know it; deploys natively as Vercel Functions |
+| Backend | **Hono** (TypeScript, -) | You already know it; deploys natively as Vercel Functions |
 | Database | **Neon Postgres** (serverless Postgres) | You already use it; scales to zero, free tier is enough for this project |
-| ORM | **Drizzle ORM** | Same as Offerly |
-| Auth (dashboard users) | **Better Auth** (email/password) | Same as Offerly |
+| ORM | **Drizzle ORM** | - |
+| Auth (dashboard users) | **Better Auth** (email/password) | - |
 | Device auth | Simple per-station API key (bearer token) checked in the API route | Devices don't need full user auth, just a shared secret |
-| Frontend | **React + Vite + TypeScript + Tailwind CSS** | Same as Offerly |
+| Frontend | **React + Vite + TypeScript + Tailwind CSS** | - |
 | Data fetching | **TanStack Query** (React Query) with polling (`refetchInterval`) | Gives you "near real-time" updates without needing WebSockets |
 | Charts | **Recharts** | Matches the bar chart in your wireframe (Figure 2) |
-| Hosting | **Vercel** — two projects, frontend + backend, exactly like Offerly | See §7 for why this works well here |
+| Hosting | **Vercel** — two projects, frontend + backend | See §7 for why this works well here |
 | Repo structure | Monorepo: `firmware/`, `client/` (Vite), `server/` (Hono) | Keeps everything in one GitHub repo for your portfolio |
 
 ---
@@ -43,7 +41,7 @@ Since you already built [Offerly](#) with **React + Vite + TypeScript + Neon + D
 [React dashboard on Vercel]
 ```
 
-The ESP32 never talks to the database directly — it only ever calls your API. The dashboard never talks to the ESP32 directly either — it only ever calls your API and reads from Postgres. This is the same shape as Offerly's client → server → Neon pattern, just with a device added as a second "client."
+The ESP32 never talks to the database directly — it only ever calls your API. The dashboard never talks to the ESP32 directly either — it only ever calls your API and reads from Postgres. Client → server → Neon pattern, just with a device added as a second "client."
 
 ---
 
@@ -99,7 +97,7 @@ The ESP32 never talks to the database directly — it only ever calls your API. 
 
 ## 5. Phase 3 — Database Schema (Neon + Drizzle)
 
-Set this up exactly like Offerly's `server/` package — same `drizzle.config.ts` pattern, same `DATABASE_URL` env var from Neon.
+`server/` package — same `drizzle.config.ts` pattern, same `DATABASE_URL` env var from Neon.
 
 ```ts
 // schema.ts (Drizzle)
@@ -147,17 +145,17 @@ export const alerts = pgTable("alerts", {
 });
 
 export const users = pgTable("users", {
-  // Better Auth's standard fields, same as Offerly
+  // Better Auth's standard fields, -
 });
 ```
 
-Run `drizzle-kit push` against your Neon branch, same workflow you used for Offerly.
+Run `drizzle-kit push` against your Neon branch.
 
 ---
 
 ## 6. Phase 4 — Backend API (Hono)
 
-Mirror Offerly's `server/` folder structure. Key routes:
+Key routes:
 
 | Method & Path | Purpose | Auth |
 |---|---|---|
@@ -175,11 +173,11 @@ Add a small piece of **server-side logic on every `POST /api/readings`**: if `fo
 
 ## 7. Phase 5 — Web Dashboard (React + Vite)
 
-1. Scaffold with Vite (`npm create vite@latest client -- --template react-ts`), Tailwind, same as Offerly's client setup.
-2. Pages/routes (React Router, same as Offerly): `/login`, `/dashboard`, `/dashboard/:stationId`, `/schedule`, `/reports`, `/settings`.
+1. Scaffold with Vite (`npm create vite@latest client -- --template react-ts`), Tailwind, -'s client setup.
+2. Pages/routes (React Router, -): `/login`, `/dashboard`, `/dashboard/:stationId`, `/schedule`, `/reports`, `/settings`.
 3. Use **TanStack Query** with `refetchInterval: 15000` (15s) on the station status query — this gives you a live-feeling dashboard without WebSockets, which fits the serverless/Vercel model well.
 4. Build the cards from Figure 1's wireframe: Food Level, Water Level, Solar Energy Used, Animal Visits (with the weekly Recharts bar chart), Station Status, Next Scheduled Feeding, Notifications panel, Feeding Schedule editor.
-5. Protect dashboard routes with Better Auth's session check, same pattern as Offerly.
+5. Protect dashboard routes with Better Auth's session check.
 
 ---
 
@@ -200,13 +198,13 @@ Add a small piece of **server-side logic on every `POST /api/readings`**: if `fo
 **Why it fits:**
 - Vercel Functions are stateless HTTP endpoints. Your ESP32 doing an `HTTPClient.POST()` every few minutes is exactly the traffic pattern serverless functions are built for — there's no persistent connection to maintain.
 - Neon Postgres is itself serverless and scales to zero, so it pairs naturally with Vercel's model (no server for you to keep running or paying for 24/7).
-- You've already deployed this exact shape (separate frontend + backend Vercel projects) for Offerly, so the deployment steps are the same: push to GitHub, import both folders as separate Vercel projects, set `DATABASE_URL` and your Better Auth secrets as environment variables.
+- Separate frontend + backend Vercel projects, so the deployment steps are the same: push to GitHub, import both folders as separate Vercel projects, set `DATABASE_URL` and your Better Auth secrets as environment variables.
 
 **What Vercel is *not* a good fit for, and why this plan avoids it:**
 - **MQTT / persistent sockets** — Vercel Functions don't keep long-lived connections open, so a traditional MQTT-broker architecture wouldn't work here. That's why this plan uses plain HTTPS REST calls from the ESP32 instead — sidesteps the problem entirely.
 - **Sub-daily background jobs on the free Hobby plan** — Vercel Cron jobs on Hobby can only run once per day. That's fine for the optional "daily summary" job above, but if you ever wanted, say, an automated check every 5 minutes, you'd either upgrade to Pro ($20/mo) or trigger that route from a free external scheduler (e.g., cron-job.org) hitting your API URL — your API route itself has no restriction on how often it's called, only Vercel's *built-in* scheduler does.
 
-**Deployment checklist** (same as your Offerly flow):
+**Deployment checklist** 
 1. Push `client/` and `server/` to the same GitHub repo (or separate repos, your call).
 2. Import `server/` as one Vercel project → set `DATABASE_URL` (from Neon), Better Auth secret, and a `DEVICE_API_KEY_SALT` env var.
 3. Import `client/` as a second Vercel project → set `VITE_API_URL` pointing at the deployed backend URL.
