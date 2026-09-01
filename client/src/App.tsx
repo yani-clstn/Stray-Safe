@@ -41,6 +41,43 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
+// Helper function to calculate station operational status dynamically
+function getStationStatus(foodLevel: number, waterLevel: number, isDarkMode: boolean) {
+  const currentHour = new Date().getHours();
+  const isCampusClosed = currentHour >= 18 || currentHour < 6; // Closed overnight (6:00 PM – 6:00 AM)
+
+  if (foodLevel <= 10 || waterLevel <= 10) {
+    return {
+      label: "Needs Maintenance",
+      colorClass: "bg-red-500",
+      badgeClass: isDarkMode
+        ? "bg-red-950/40 border-red-800 text-red-400"
+        : "bg-red-50 border-red-300 text-red-700",
+      icon: AlertTriangle,
+    };
+  }
+
+  if (isCampusClosed) {
+    return {
+      label: "Station Closed (Overnight)",
+      colorClass: "bg-amber-500",
+      badgeClass: isDarkMode
+        ? "bg-amber-950/40 border-amber-800 text-amber-400"
+        : "bg-amber-50 border-amber-300 text-amber-700",
+      icon: Moon,
+    };
+  }
+
+  return {
+    label: "Station Active",
+    colorClass: "bg-emerald-500",
+    badgeClass: isDarkMode
+      ? "bg-emerald-950/40 border-emerald-800 text-emerald-400"
+      : "bg-emerald-50 border-emerald-300 text-emerald-700",
+    icon: Wifi,
+  };
+}
+
 // Mock fallback data for preview when backend API is unavailable
 const MOCK_STATION = {
   id: "station-01",
@@ -305,6 +342,9 @@ export default function Dashboard() {
     station?.batteryPercentage ?? station?.batteryPercentage ?? 0;
   const solarVoltage = station?.solarVoltage ?? station?.solarVoltage ?? 0;
 
+  const stationStatus = getStationStatus(foodLevel, waterLevel, isDarkMode);
+  const StatusIcon = stationStatus.icon;
+
   if (isLoading) {
     return (
       <div
@@ -399,18 +439,18 @@ export default function Dashboard() {
 
           <Badge
             variant="outline"
-            className={`px-3 py-1.5 rounded-full gap-2 text-xs font-semibold ${isDarkMode ? "bg-[#2b180d] border-[#4a2c11] text-[#d4a373]" : "bg-[#f3e5d8] border-[#d2ba9e] text-[#3d2314]"}`}
+            className={`px-3 py-1.5 rounded-full gap-2 text-xs font-semibold border ${stationStatus.badgeClass}`}
           >
             <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#8c5638] opacity-75"></span>
               <span
-                className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isDarkMode ? "bg-[#d4a373]" : "bg-[#4a2c11]"}`}
-              ></span>
+                className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${stationStatus.colorClass}`}
+              />
+              <span
+                className={`relative inline-flex rounded-full h-2.5 w-2.5 ${stationStatus.colorClass}`}
+              />
             </span>
-            <Wifi
-              className={`w-3.5 h-3.5 ${isDarkMode ? "text-[#d4a373]" : "text-[#4a2c11]"}`}
-            />{" "}
-            Station Online
+            <StatusIcon className="w-3.5 h-3.5" />
+            {stationStatus.label}
           </Badge>
         </div>
       </header>
