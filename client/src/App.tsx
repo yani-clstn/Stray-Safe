@@ -111,12 +111,10 @@ function CampusWeatherCard({ isDarkMode }: { isDarkMode: boolean }) {
     const fetchCampusWeather = async () => {
       try {
         const apiKey = import.meta.env.VITE_WEATHER_API_KEY;
-        // Coordinates for Cavite / Imus campus area
         const lat = 14.4297;
         const lon = 120.9367;
 
         if (!apiKey) {
-          // Fallback advisory state if API key is not configured
           setWeather({
             condition: "Fair / Moderate",
             temp: 31,
@@ -239,7 +237,6 @@ export default function Dashboard() {
   const [isDonateOPEN, setIsDonateOPEN] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Sync dark class on document root
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add("dark");
@@ -302,7 +299,6 @@ export default function Dashboard() {
     window.open(DONATION_URL, "_blank", "noopener,noreferrer");
   };
 
-  // Extract telemetry metrics
   const foodLevel = station?.foodLevel ?? station?.foodlevel ?? 0;
   const waterLevel = station?.waterLevel ?? station?.waterlevel ?? 0;
   const batteryPercentage =
@@ -335,7 +331,6 @@ export default function Dashboard() {
         className={`max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b mb-8 gap-4 ${isDarkMode ? "border-[#3d2314]" : "border-[#e6d5c3]"}`}
       >
         <div className="flex items-center gap-3">
-          {/* Choco Icon Badge */}
           <div
             className={`p-3 rounded-2xl shadow-md ${isDarkMode ? "bg-[#d4a373] text-[#1a0f0a]" : "bg-[#3d2314] text-[#fcf8f2]"}`}
           >
@@ -365,7 +360,6 @@ export default function Dashboard() {
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
-          {/* Choco Donate Button */}
           <Button
             variant="outline"
             size="sm"
@@ -389,7 +383,6 @@ export default function Dashboard() {
             {isRefreshing ? "Refreshing..." : "Refresh"}
           </Button>
 
-          {/* Theme Toggle Button */}
           <Button
             variant="outline"
             size="icon"
@@ -824,13 +817,12 @@ export default function Dashboard() {
           </Card>
         </div>
       </main>
-      {/* Dashboard Footer */}
+
       {/* Dashboard Footer */}
       <footer
         className={`mt-16 border-t py-8 transition-colors ${isDarkMode ? "border-[#3d2314] bg-[#1a0f0a] text-[#c4a997]" : "border-[#e6d5c3] bg-[#fcf8f2] text-[#6b4a36]"}`}
       >
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
-          {/* Left: Branding & Mission */}
           <div className="flex items-center gap-3 text-center md:text-left">
             <div
               className={`p-2.5 rounded-2xl ${isDarkMode ? "bg-[#3d2314] text-[#d4a373]" : "bg-[#f3e5d8] text-[#3d2314]"}`}
@@ -850,7 +842,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Center / Right: Quick Info & Admin Link */}
           <div className="flex items-center gap-4 text-xs flex-wrap justify-center">
             <span className="flex items-center gap-1.5 font-medium">
               <Activity className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
@@ -858,27 +849,20 @@ export default function Dashboard() {
             </span>
             <span>•</span>
 
-            {/* Discreet Admin Login Trigger */}
             <button
               onClick={() =>
                 alert(
                   "Redirecting to Caretaker / Admin Authentication Portal...",
                 )
               }
-              className={`flex items-center gap-1 font-semibold hover:underline transition-colors ${isDarkMode ? "text-[#d4a373]" : "text-[#3d2314]"}`}
+              className={`flex items-center gap-1 font-semibold hover:underline transition-all ${
+                isDarkMode ? "text-[#d4a373]" : "text-[#3d2314]"
+              }`}
             >
               <Lock className="w-3.5 h-3.5" />
-              Caretaker Access
+              Admin Access
             </button>
           </div>
-        </div>
-
-        {/* Bottom Copyright Bar */}
-        <div
-          className={`max-w-7xl mx-auto px-4 mt-6 pt-4 border-t text-center text-[11px] ${isDarkMode ? "border-[#2d1a10] text-[#8c6b58]" : "border-[#f3e5d8] text-[#a0826e]"}`}
-        >
-          © {new Date().getFullYear()} StraySafe Project. Built for stray animal
-          care & transparent community support.
         </div>
       </footer>
     </div>
