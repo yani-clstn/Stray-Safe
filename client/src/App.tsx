@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import {
   PawPrint,
@@ -6,20 +5,17 @@ import {
   Droplets,
   Sun,
   Battery,
-  Wifi,
   BellRing,
-  Heart,
   RefreshCw,
   HeartHandshake,
-  X,
   Moon,
-  CloudRain,
   AlertTriangle,
-  ShieldAlert,
-  PackageCheck,
-  TrendingUp,
   Lock,
   Activity,
+  PackageCheck,
+  Calendar as CalendarIcon,
+  Info,
+  X,
 } from "lucide-react";
 import {
   BarChart,
@@ -41,48 +37,107 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-// Helper function to calculate station operational status dynamically
-function getStationStatus(foodLevel: number, waterLevel: number, isDarkMode: boolean) {
-  const currentHour = new Date().getHours();
-  const isCampusClosed = currentHour >= 18 || currentHour < 6; // Closed overnight (6:00 PM – 6:00 AM)
-
-  if (foodLevel <= 10 || waterLevel <= 10) {
-    return {
-      label: "Needs Maintenance",
-      colorClass: "bg-red-500",
-      badgeClass: isDarkMode
-        ? "bg-red-950/40 border-red-800 text-red-400"
-        : "bg-red-50 border-red-300 text-red-700",
-      icon: AlertTriangle,
-    };
-  }
-
-  if (isCampusClosed) {
-    return {
-      label: "Station Closed (Overnight)",
-      colorClass: "bg-amber-500",
-      badgeClass: isDarkMode
-        ? "bg-amber-950/40 border-amber-800 text-amber-400"
-        : "bg-amber-50 border-amber-300 text-amber-700",
-      icon: Moon,
-    };
-  }
-
-  return {
-    label: "Station Active",
-    colorClass: "bg-emerald-500",
-    badgeClass: isDarkMode
-      ? "bg-emerald-950/40 border-emerald-800 text-emerald-400"
-      : "bg-emerald-50 border-emerald-300 text-emerald-700",
-    icon: Wifi,
-  };
+interface HeatmapDay {
+  dayOfWeek: number;
+  weekIndex: number;
+  dateStr: string;
+  fullDate: string;
+  kg: number;
 }
 
-// Mock fallback data for preview when backend API is unavailable
+const generateGithubCalendarData = () => {
+  const days: HeatmapDay[] = [];
+  const today = new Date();
+
+  const startDate = new Date(today);
+  startDate.setDate(today.getDate() - 364);
+  startDate.setDate(startDate.getDate() - startDate.getDay());
+
+  const totalDays = 371;
+  const mockWeights = [0, 0, 1.5, 0, 3.0, 0, 5.2, 0, 0, 2.0, 4.5, 0, 1.0, 0, 6.0, 0, 0, 3.5, 0, 0, 2.5, 0, 4.0, 0, 0, 1.5, 0, 3.5, 7.0];
+
+  for (let i = 0; i < totalDays; i++) {
+    const currentDate = new Date(startDate);
+    currentDate.setDate(startDate.getDate() + i);
+
+    const isFuture = currentDate > today;
+    const kg = isFuture ? 0 : mockWeights[i % mockWeights.length];
+
+    const dateStr = currentDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    const fullDateStr = currentDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+
+    days.push({
+      dayOfWeek: currentDate.getDay(),
+      weekIndex: Math.floor(i / 7),
+      dateStr,
+      fullDate: fullDateStr,
+      kg,
+    });
+  }
+
+  const calendarGrid: (HeatmapDay | null)[][] = Array.from({ length: 7 }, () => Array(53).fill(null));
+  days.forEach((day) => {
+    if (day.weekIndex < 53) {
+      calendarGrid[day.dayOfWeek][day.weekIndex] = day;
+    }
+  });
+
+  const monthsHeader: { name: string; colSpan: number }[] = [];
+  let currentMonth = "";
+  let currentSpan = 0;
+
+  for (let week = 0; week < 53; week++) {
+    const sampleDay = calendarGrid[3][week] || calendarGrid[0][week];
+    if (sampleDay) {
+      const monthName = sampleDay.dateStr.split(" ")[0];
+      if (monthName !== currentMonth) {
+        if (currentMonth !== "") {
+          monthsHeader.push({ name: currentMonth, colSpan: currentSpan });
+        }
+        currentMonth = monthName;
+        currentSpan = 1;
+      } else {
+        currentSpan++;
+      }
+    }
+  }
+  if (currentSpan > 0) {
+    monthsHeader.push({ name: currentMonth, colSpan: currentSpan });
+  }
+
+  return { calendarGrid, monthsHeader };
+};
+
+const getHeatmapColor = (kg: number, isDarkMode: boolean) => {
+  if (kg === 0) {
+    return isDarkMode
+      ? "bg-[#2d180c] border-[#382013]"
+      : "bg-[#fbf4eb] border-[#ebdcd0]";
+  }
+  if (kg <= 2) {
+    return isDarkMode
+      ? "bg-[#78350f] border-[#92400e]"
+      : "bg-[#fde68a] border-[#fcd34d]";
+  }
+  if (kg <= 4) {
+    return isDarkMode
+      ? "bg-[#b45309] border-[#d97706]"
+      : "bg-[#f59e0b] border-[#d97706]";
+  }
+  if (kg <= 6) {
+    return isDarkMode
+      ? "bg-[#d97706] border-[#f59e0b]"
+      : "bg-[#d97706] border-[#b45309]";
+  }
+  return isDarkMode
+    ? "bg-[#f59e0b] border-[#fef3c7]"
+    : "bg-[#381c0d] border-[#251208]";
+};
+
 const MOCK_STATION = {
   id: "station-01",
   name: "CvSU - Imus",
-  location: "Campus Gate 2",
+  subLocation: "Campus Gate 2",
   foodLevel: 78,
   waterLevel: 42,
   batteryPercentage: 92,
@@ -102,177 +157,23 @@ const MOCK_ANALYTICS = {
   ],
 };
 
-// Mock donation transparency analytics
-const MOCK_DONATION_ANALYTICS = {
-  totalRestockedKg: 42.5,
-  monthlyGoalKg: 50,
-  recentDonations: [
-    {
-      id: 1,
-      donor: "Anonymous Student",
-      amount: "3.5 kg Dry Kibble",
-      date: "2 hrs ago",
-    },
-    {
-      id: 2,
-      donor: "Anonymous Student",
-      amount: "5.0 kg Cat Food",
-      date: "Yesterday",
-    },
-    {
-      id: 3,
-      donor: "Anonymous Student",
-      amount: "2.0 kg Dog Kibble",
-      date: "2 days ago",
-    },
-  ],
-};
-
-const API_BASE_URL = import.meta.env.PROD
-  ? ""
-  : import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
-
-const FETCH_URL = `${API_BASE_URL}/api/stations/station-01`;
-const ANALYTICS_URL = `${API_BASE_URL}/api/stations/station-01/analytics`;
-
-// Live Weather Advisory Component
-function CampusWeatherCard({ isDarkMode }: { isDarkMode: boolean }) {
-  const [weather, setWeather] = useState({
-    condition: "Checking Forecast...",
-    temp: 31,
-    isSevere: false,
-    message: "Fetching local campus meteorological data...",
-  });
-
-  useEffect(() => {
-    const fetchCampusWeather = async () => {
-      try {
-        const apiKey = import.meta.env.VITE_WEATHER_API_KEY;
-        const lat = 14.4297;
-        const lon = 120.9367;
-
-        if (!apiKey) {
-          setWeather({
-            condition: "Fair / Moderate",
-            temp: 31,
-            isSevere: false,
-            message: "Campus grounds clear. Optimal outdoor station operation.",
-          });
-          return;
-        }
-
-        const res = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`,
-        );
-        if (!res.ok) throw new Error("Weather fetch failed");
-        const data = await res.json();
-
-        const mainCondition = data.weather[0]?.main?.toLowerCase() || "";
-        const temp = Math.round(data.main?.temp || 30);
-
-        if (
-          mainCondition.includes("rain") ||
-          mainCondition.includes("thunderstorm")
-        ) {
-          setWeather({
-            condition: "Heavy Rain Forecasted",
-            temp,
-            isSevere: true,
-            message:
-              "Rainfall expected in campus area. Relocate feeder to covered shelter.",
-          });
-        } else if (temp >= 36) {
-          setWeather({
-            condition: "High Heat Index",
-            temp,
-            isSevere: true,
-            message:
-              "Extreme heat detected. Monitor water reservoir level frequently.",
-          });
-        } else {
-          setWeather({
-            condition: "Optimal Weather",
-            temp,
-            isSevere: false,
-            message:
-              "Campus conditions are normal. Outdoor feeder safe in current spot.",
-          });
-        }
-      } catch {
-        setWeather({
-          condition: "Fair / Good",
-          temp: 31,
-          isSevere: false,
-          message: "Campus grounds clear. Optimal outdoor station operation.",
-        });
-      }
-    };
-
-    fetchCampusWeather();
-  }, []);
-
-  return (
-    <Card
-      className={`rounded-3xl shadow-sm border transition-colors ${
-        weather.isSevere
-          ? isDarkMode
-            ? "border-amber-600/60 bg-amber-950/20"
-            : "border-amber-400 bg-amber-50"
-          : isDarkMode
-            ? "border-[#3d2314] bg-[#25160f]"
-            : "border-[#e6d5c3] bg-[#fffcf7]"
-      }`}
-    >
-      <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-        <div className="flex items-center gap-2">
-          {weather.isSevere ? (
-            <AlertTriangle className="w-5 h-5 text-amber-500 animate-pulse" />
-          ) : (
-            <CloudRain
-              className={`w-5 h-5 ${isDarkMode ? "text-[#d4a373]" : "text-[#3d2314]"}`}
-            />
-          )}
-          <CardTitle
-            className={`text-sm font-bold ${isDarkMode ? "text-[#f3e5d8]" : "text-[#2b180d]"}`}
-          >
-            Campus Weather Risk Monitor
-          </CardTitle>
-        </div>
-        <Badge
-          className={
-            weather.isSevere
-              ? "bg-amber-500 text-black font-bold"
-              : isDarkMode
-                ? "bg-[#3d2314] text-[#d4a373]"
-                : "bg-[#f3e5d8] text-[#3d2314]"
-          }
-        >
-          {weather.condition} • {weather.temp}°C
-        </Badge>
-      </CardHeader>
-      <CardContent>
-        <p
-          className={`text-xs ${isDarkMode ? "text-[#c4a997]" : "text-[#6b4a36]"}`}
-        >
-          {weather.message}
-        </p>
-
-        {weather.isSevere && (
-          <div className="mt-3 p-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-2">
-            <ShieldAlert className="w-4 h-4 text-amber-500 shrink-0" />
-            <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400">
-              Relocation Protocol Triggered: Notify Caretakers
-            </span>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
+const MOCK_ALERTS = [
+  {
+    id: 1,
+    title: "Water Bowl Low",
+    description: "Current level is below 45%. Pump refill cycle queued.",
+  },
+  {
+    id: 2,
+    title: "Scheduled Feed Executed",
+    description: "Dispensed 150g portion at 12:00 PM.",
+  },
+];
 
 export default function Dashboard() {
-  const [isDonateOPEN, setIsDonateOPEN] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<HeatmapDay | null>(null);
+  const { calendarGrid, monthsHeader } = generateGithubCalendarData();
 
   useEffect(() => {
     if (isDarkMode) {
@@ -282,625 +183,483 @@ export default function Dashboard() {
     }
   }, [isDarkMode]);
 
-  const {
-    data: station = MOCK_STATION,
-    isLoading,
-    isFetching: isFetchingStation,
-    refetch: refetchStation,
-  } = useQuery({
-    queryKey: ["station"],
-    queryFn: async () => {
-      try {
-        const res = await fetch(FETCH_URL);
-        if (!res.ok) throw new Error("API returned non-200 status");
-        return await res.json();
-      } catch {
-        return MOCK_STATION;
-      }
-    },
-    refetchInterval: false,
-    refetchOnWindowFocus: false,
-    staleTime: Infinity,
-  });
-
-  const {
-    data: analytics = MOCK_ANALYTICS,
-    isFetching: isFetchingAnalytics,
-    refetch: refetchAnalytics,
-  } = useQuery({
-    queryKey: ["analytics"],
-    queryFn: async () => {
-      try {
-        const res = await fetch(ANALYTICS_URL);
-        if (!res.ok) throw new Error("API returned non-200 status");
-        return await res.json();
-      } catch {
-        return MOCK_ANALYTICS;
-      }
-    },
-    refetchInterval: false,
-    refetchOnWindowFocus: false,
-    staleTime: Infinity,
-  });
-
-  const isRefreshing = isFetchingStation || isFetchingAnalytics;
-
-  const handleManualRefresh = () => {
-    refetchStation();
-    refetchAnalytics();
-  };
-
-  const DONATION_URL = "https://www.buymeacoffee.com/straysafe";
-
-  const handleDonateRedirect = () => {
-    window.open(DONATION_URL, "_blank", "noopener,noreferrer");
-  };
-
-  const foodLevel = station?.foodLevel ?? station?.foodlevel ?? 0;
-  const waterLevel = station?.waterLevel ?? station?.waterlevel ?? 0;
-  const batteryPercentage =
-    station?.batteryPercentage ?? station?.batteryPercentage ?? 0;
-  const solarVoltage = station?.solarVoltage ?? station?.solarVoltage ?? 0;
-
-  const stationStatus = getStationStatus(foodLevel, waterLevel, isDarkMode);
-  const StatusIcon = stationStatus.icon;
-
-  if (isLoading) {
-    return (
-      <div
-        className={`min-h-screen flex items-center justify-center ${isDarkMode ? "bg-[#1a0f0a]" : "bg-[#fcf8f2]"}`}
-      >
-        <div
-          className={`flex items-center gap-2 font-bold text-lg animate-bounce ${isDarkMode ? "text-[#f3e5d8]" : "text-[#3d2314]"}`}
-        >
-          <PawPrint
-            className={`w-8 h-8 ${isDarkMode ? "text-[#d4a373]" : "text-[#4a2c11]"}`}
-          />
-          <span>Loading StraySafe Telemetry...</span>
-        </div>
-      </div>
-    );
-  }
+  const station = MOCK_STATION;
+  const analytics = MOCK_ANALYTICS;
 
   return (
     <div
-      className={`min-h-screen p-4 md:p-8 transition-colors duration-300 ${isDarkMode ? "bg-[#1a0f0a] text-[#f3e5d8]" : "bg-[#fcf8f2] text-[#2b180d]"}`}
+      className={`min-h-screen flex flex-col justify-between transition-colors duration-300 font-sans ${
+        isDarkMode
+          ? "bg-[#1d1009] text-[#fceee6]"
+          : "bg-[#fdfbf7] text-[#331c0e]"
+      }`}
     >
-      {/* Header */}
-      <header
-        className={`max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b mb-8 gap-4 ${isDarkMode ? "border-[#3d2314]" : "border-[#e6d5c3]"}`}
-      >
-        <div className="flex items-center gap-3">
-          <div
-            className={`p-3 rounded-2xl shadow-md ${isDarkMode ? "bg-[#d4a373] text-[#1a0f0a]" : "bg-[#3d2314] text-[#fcf8f2]"}`}
-          >
-            <PawPrint className="w-8 h-8" />
-          </div>
-          <div>
-            <h1
-              className={`text-2xl font-black tracking-tight flex items-center gap-2 ${isDarkMode ? "text-[#f3e5d8]" : "text-[#2b180d]"}`}
+      <div className="p-4 md:p-8 max-w-7xl mx-auto w-full space-y-6">
+        {/* Header */}
+        <header
+          className={`flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b-2 gap-4 ${
+            isDarkMode ? "border-[#382013]" : "border-[#f4e2d8]"
+          }`}
+        >
+          <div className="flex items-center gap-3.5">
+            <div
+              className={`p-3.5 rounded-2xl shadow-sm ${
+                isDarkMode
+                  ? "bg-[#331c0e] text-[#fca5a5]"
+                  : "bg-[#381c0d] text-[#fff8f0]"
+              }`}
             >
-              STRAY SAFE{" "}
-              <Heart
-                className={`w-5 h-5 ${isDarkMode ? "text-[#d4a373] fill-[#d4a373]" : "text-[#4a2c11] fill-[#4a2c11]"}`}
-              />
-            </h1>
-            <p
-              className={`text-sm font-medium ${isDarkMode ? "text-[#c4a997]" : "text-[#6b4a36]"}`}
-            >
-              Station:{" "}
-              <span
-                className={`font-semibold ${isDarkMode ? "text-[#f3e5d8]" : "text-[#3d2314]"}`}
+              <PawPrint className="w-7 h-7" />
+            </div>
+            <div>
+              <h1
+                className={`text-2xl md:text-3xl font-black tracking-tight flex items-center gap-2 ${
+                  isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"
+                }`}
               >
-                {station?.name || "Station 01"}
-              </span>{" "}
-              ({station?.location || "Main Gate"})
-            </p>
+                STRAY SAFE <HeartHandshake className="w-5 h-5 text-amber-700 fill-amber-700" />
+              </h1>
+              <p className={`text-xs md:text-sm font-semibold ${isDarkMode ? "text-[#c2a293]" : "text-[#6e4e3d]"}`}>
+                Station:{" "}
+                <span className="font-bold">
+                  {station.name} ({station.subLocation})
+                </span>
+              </p>
+            </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-3 flex-wrap">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsDonateOPEN(true)}
-            className={`rounded-2xl h-11 font-bold shadow-md border-none flex items-center gap-2 ${isDarkMode ? "bg-[#d4a373] hover:bg-[#bc8a5f] text-[#1a0f0a]" : "bg-[#3d2314] hover:bg-[#2b180d] text-[#fcf8f2]"}`}
-          >
-            <HeartHandshake className="w-5 h-5" />
-            Donate Cat Food Now!
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleManualRefresh}
-            disabled={isRefreshing}
-            className={`rounded-full gap-2 text-xs font-semibold shadow-sm bg-transparent ${isDarkMode ? "border-[#4a2c11] text-[#f3e5d8] hover:bg-[#2b180d]" : "border-[#d2ba9e] text-[#3d2314] hover:bg-[#f3e5d8]"}`}
-          >
-            <RefreshCw
-              className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`}
-            />
-            {isRefreshing ? "Refreshing..." : "Refresh"}
-          </Button>
-
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className={`rounded-full h-9 w-9 border ${isDarkMode ? "border-[#4a2c11] text-[#d4a373] bg-[#2b180d] hover:bg-[#3d2314]" : "border-[#d2ba9e] text-[#3d2314] bg-[#f3e5d8] hover:bg-[#e6d5c3]"}`}
-            title="Toggle Theme"
-          >
-            {isDarkMode ? (
-              <Sun className="w-4 h-4" />
-            ) : (
-              <Moon className="w-4 h-4" />
-            )}
-          </Button>
-
-          <Badge
-            variant="outline"
-            className={`px-3 py-1.5 rounded-full gap-2 text-xs font-semibold border ${stationStatus.badgeClass}`}
-          >
-            <span className="relative flex h-2.5 w-2.5">
-              <span
-                className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${stationStatus.colorClass}`}
-              />
-              <span
-                className={`relative inline-flex rounded-full h-2.5 w-2.5 ${stationStatus.colorClass}`}
-              />
-            </span>
-            <StatusIcon className="w-3.5 h-3.5" />
-            {stationStatus.label}
-          </Badge>
-        </div>
-      </header>
-
-      {/* Donation Modal / Dialog */}
-      {isDonateOPEN && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1a0f0a]/70 backdrop-blur-sm p-4">
-          <div
-            className={`border rounded-3xl p-6 max-w-md w-full shadow-2xl relative space-y-4 ${isDarkMode ? "bg-[#25160f] text-[#f3e5d8] border-[#3d2314]" : "bg-[#fcf8f2] text-[#2b180d] border-[#e6d5c3]"}`}
-          >
-            <button
-              onClick={() => setIsDonateOPEN(false)}
-              className={`absolute top-4 right-4 p-2 rounded-full ${isDarkMode ? "hover:bg-[#3d2314] text-[#f3e5d8]" : "hover:bg-[#f3e5d8] text-[#3d2314]"}`}
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <Button
+              variant="default"
+              size="sm"
+              className={`rounded-full h-10 px-5 font-bold shadow-sm ${
+                isDarkMode
+                  ? "bg-[#d97706] hover:bg-[#b45309] text-[#fff8f0]"
+                  : "bg-[#381c0d] hover:bg-[#251208] text-[#fff8f0]"
+              }`}
             >
-              <X className="w-5 h-5" />
-            </button>
+              <HeartHandshake className="w-4 h-4 mr-1.5" />
+              Donate Cat Food Now!
+            </Button>
 
-            <div className="flex items-center gap-3">
-              <div
-                className={`p-3 rounded-2xl ${isDarkMode ? "bg-[#3d2314] text-[#d4a373]" : "bg-[#f3e5d8] text-[#3d2314]"}`}
-              >
-                <HeartHandshake className="w-7 h-7" />
+            <Button
+              variant="outline"
+              size="icon"
+              className={`rounded-full h-10 w-10 border ${
+                isDarkMode
+                  ? "border-[#382013] bg-[#29160b] text-[#fceee6]"
+                  : "border-[#e2d5ca] bg-white text-[#3e2314]"
+              }`}
+              title="Refresh Telemetry"
+            >
+              <RefreshCw className="w-4 h-4" />
+            </Button>
+
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className={`rounded-full h-10 w-10 border ${
+                isDarkMode
+                  ? "border-[#382013] bg-[#29160b] text-amber-400"
+                  : "border-[#e2d5ca] bg-[#f8efe6] text-[#52301c]"
+              }`}
+              title="Toggle Theme"
+            >
+              {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
+
+            <Badge
+              variant="outline"
+              className={`px-3 py-1.5 rounded-full gap-2 text-xs font-bold border ${
+                isDarkMode
+                  ? "bg-[#2d180c] border-[#d97706]/40 text-[#fcd34d]"
+                  : "bg-[#fbf4eb] border-[#e2c7b5] text-[#4a2815]"
+              }`}
+            >
+              <span className="w-2 h-2 rounded-full bg-amber-600 animate-pulse" />
+              Station Online
+            </Badge>
+          </div>
+        </header>
+
+        {/* Weather Risk Monitor Banner */}
+        <Card
+          className={`rounded-2xl border transition-colors ${
+            isDarkMode
+              ? "border-[#b45309]/50 bg-[#29160c]"
+              : "border-[#f59e0b]/60 bg-[#fffbeb]"
+          }`}
+        >
+          <CardContent className="p-4 md:p-5 space-y-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+                <h3 className={`text-sm font-extrabold ${isDarkMode ? "text-[#fef3c7]" : "text-[#2e170a]"}`}>
+                  Campus Weather Risk Monitor
+                </h3>
               </div>
-              <h2
-                className={`text-xl font-bold ${isDarkMode ? "text-[#f3e5d8]" : "text-[#2b180d]"}`}
-              >
-                Donate to Stray Safe
-              </h2>
+              <Badge className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs px-3 py-1 rounded-full">
+                Heavy Rain Forecasted • 32°C
+              </Badge>
             </div>
 
-            <p
-              className={`text-sm ${isDarkMode ? "text-[#c4a997]" : "text-[#6b4a36]"}`}
-            >
-              Your donation directly funds cat & dog food refills and keeps
-              automated feeding stations powered and operational.
+            <p className={`text-xs md:text-sm font-medium ${isDarkMode ? "text-[#d1b2a3]" : "text-[#5e4334]"}`}>
+              Rainfall expected in campus area. Relocate feeder to covered shelter.
             </p>
 
             <div
-              className={`p-4 rounded-2xl border space-y-2 ${isDarkMode ? "bg-[#1a0f0a]/60 border-[#3d2314]" : "bg-[#f3e5d8]/60 border-[#e6d5c3]"}`}
+              className={`p-2.5 rounded-xl border flex items-center gap-2 text-xs font-bold ${
+                isDarkMode
+                  ? "bg-[#331a0b] border-[#5e3215] text-amber-400"
+                  : "bg-[#fef3c7]/60 border-[#fde68a] text-amber-900"
+              }`}
             >
-              <p
-                className={`text-xs ${isDarkMode ? "text-[#d4a373]" : "text-[#4a2c11]"}`}
-              >
-                Support automated feeding and water refills across stations.
-              </p>
+              <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-600" />
+              <span>Relocation Protocol Triggered: Notify Caretakers</span>
             </div>
+          </CardContent>
+        </Card>
 
-            <div className="flex gap-3 pt-2">
-              <Button
-                variant="outline"
-                onClick={() => setIsDonateOPEN(false)}
-                className={`flex-1 rounded-2xl h-11 ${isDarkMode ? "border-[#4a2c11] text-[#f3e5d8]" : "border-[#d2ba9e] text-[#3d2314]"}`}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleDonateRedirect}
-                className={`flex-1 rounded-2xl h-11 font-bold ${isDarkMode ? "bg-[#d4a373] hover:bg-[#bc8a5f] text-[#1a0f0a]" : "bg-[#3d2314] hover:bg-[#2b180d] text-[#fcf8f2]"}`}
-              >
-                Donate to Stray Safe Now!
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <main className="max-w-7xl mx-auto space-y-8">
-        {/* Weather Risk Banner */}
-        <CampusWeatherCard isDarkMode={isDarkMode} />
-
-        {/* Primary Telemetry Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {/* Food Level Card */}
-          <Card
-            className={`rounded-3xl shadow-sm ${isDarkMode ? "border-[#3d2314] bg-[#25160f]" : "border-[#e6d5c3] bg-[#fffcf7]"}`}
-          >
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle
-                className={`text-xs font-bold uppercase tracking-wider ${isDarkMode ? "text-[#c4a997]" : "text-[#6b4a36]"}`}
-              >
+        {/* Telemetry Metric Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className={`rounded-2xl border ${isDarkMode ? "border-[#382013] bg-[#261309]" : "border-[#ebdcd0] bg-white"}`}>
+            <CardHeader className="flex flex-row items-center justify-between pb-1 space-y-0">
+              <CardTitle className={`text-xs font-black uppercase tracking-wider ${isDarkMode ? "text-[#c2a293]" : "text-[#6e4e3d]"}`}>
                 Food Stock
               </CardTitle>
-              <div
-                className={`p-2 rounded-xl ${isDarkMode ? "bg-[#3d2314] text-[#d4a373]" : "bg-[#f3e5d8] text-[#3d2314]"}`}
-              >
+              <div className={`p-1.5 rounded-lg ${isDarkMode ? "bg-[#382013] text-amber-400" : "bg-[#f8efe6] text-[#78350f]"}`}>
                 <Utensils className="w-4 h-4" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div
-                className={`text-3xl font-black mb-3 ${isDarkMode ? "text-[#f3e5d8]" : "text-[#2b180d]"}`}
-              >
-                {foodLevel}%
+            <CardContent className="space-y-3">
+              <div className={`text-3xl font-black ${isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"}`}>
+                {station.foodLevel}%
               </div>
-              <Progress
-                value={foodLevel}
-                className={`h-2.5 ${isDarkMode ? "bg-[#3d2314] [&>div]:bg-amber-300" : "bg-[#f3e5d8] [&>div]:bg-amber-400"}`}
-              />
+              <Progress value={station.foodLevel} className={`h-2.5 rounded-full ${isDarkMode ? "bg-[#382013]" : "bg-[#f4e8df]"} [&>div]:bg-amber-500`} />
             </CardContent>
           </Card>
 
-          {/* Water Bowl Card */}
-          <Card
-            className={`rounded-3xl shadow-sm ${isDarkMode ? "border-[#3d2314] bg-[#25160f]" : "border-[#e6d5c3] bg-[#fffcf7]"}`}
-          >
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle
-                className={`text-xs font-bold uppercase tracking-wider ${isDarkMode ? "text-[#c4a997]" : "text-[#6b4a36]"}`}
-              >
+          <Card className={`rounded-2xl border ${isDarkMode ? "border-[#382013] bg-[#261309]" : "border-[#ebdcd0] bg-white"}`}>
+            <CardHeader className="flex flex-row items-center justify-between pb-1 space-y-0">
+              <CardTitle className={`text-xs font-black uppercase tracking-wider ${isDarkMode ? "text-[#c2a293]" : "text-[#6e4e3d]"}`}>
                 Water Level
               </CardTitle>
-              <div
-                className={`p-2 rounded-xl ${isDarkMode ? "bg-[#3d2314] text-[#d4a373]" : "bg-[#f3e5d8] text-[#3d2314]"}`}
-              >
+              <div className={`p-1.5 rounded-lg ${isDarkMode ? "bg-[#382013] text-sky-400" : "bg-[#f8efe6] text-[#78350f]"}`}>
                 <Droplets className="w-4 h-4" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div
-                className={`text-3xl font-black mb-3 ${isDarkMode ? "text-[#f3e5d8]" : "text-[#2b180d]"}`}
-              >
-                {waterLevel}%
+            <CardContent className="space-y-3">
+              <div className={`text-3xl font-black ${isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"}`}>
+                {station.waterLevel}%
               </div>
-              <Progress
-                value={waterLevel}
-                className={`h-2.5 ${isDarkMode ? "bg-[#3d2314] [&>div]:bg-sky-400" : "bg-[#f3e5d8] [&>div]:bg-blue-700"}`}
-              />
+              <Progress value={station.waterLevel} className={`h-2.5 rounded-full ${isDarkMode ? "bg-[#382013]" : "bg-[#f4e8df]"} [&>div]:bg-sky-500`} />
             </CardContent>
           </Card>
 
-          {/* Battery Voltage Card */}
-          <Card
-            className={`rounded-3xl shadow-sm ${isDarkMode ? "border-[#3d2314] bg-[#25160f]" : "border-[#e6d5c3] bg-[#fffcf7]"}`}
-          >
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle
-                className={`text-xs font-bold uppercase tracking-wider ${isDarkMode ? "text-[#c4a997]" : "text-[#6b4a36]"}`}
-              >
+          <Card className={`rounded-2xl border ${isDarkMode ? "border-[#382013] bg-[#261309]" : "border-[#ebdcd0] bg-white"}`}>
+            <CardHeader className="flex flex-row items-center justify-between pb-1 space-y-0">
+              <CardTitle className={`text-xs font-black uppercase tracking-wider ${isDarkMode ? "text-[#c2a293]" : "text-[#6e4e3d]"}`}>
                 Battery Percentage
               </CardTitle>
-              <div
-                className={`p-2 rounded-xl ${isDarkMode ? "bg-[#3d2314] text-[#d4a373]" : "bg-[#f3e5d8] text-[#3d2314]"}`}
-              >
+              <div className={`p-1.5 rounded-lg ${isDarkMode ? "bg-[#382013] text-emerald-400" : "bg-[#f8efe6] text-[#78350f]"}`}>
                 <Battery className="w-4 h-4" />
               </div>
             </CardHeader>
             <CardContent>
-              <div
-                className={`text-3xl font-black mb-1 ${isDarkMode ? "text-[#f3e5d8]" : "text-[#2b180d]"}`}
-              >
-                {batteryPercentage}%
+              <div className={`text-3xl font-black mb-1 ${isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"}`}>
+                {station.batteryPercentage}%
               </div>
-              <p
-                className={`text-xs font-semibold ${isDarkMode ? "text-[#d4a373]" : "text-[#4a2c11]"}`}
-              >
+              <p className={`text-xs font-semibold ${isDarkMode ? "text-[#a38272]" : "text-[#785948]"}`}>
                 Optimal Charge State
               </p>
             </CardContent>
           </Card>
 
-          {/* Solar Efficiency Card */}
-          <Card
-            className={`rounded-3xl shadow-sm ${isDarkMode ? "border-[#3d2314] bg-[#25160f]" : "border-[#e6d5c3] bg-[#fffcf7]"}`}
-          >
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle
-                className={`text-xs font-bold uppercase tracking-wider ${isDarkMode ? "text-[#c4a997]" : "text-[#6b4a36]"}`}
-              >
+          <Card className={`rounded-2xl border ${isDarkMode ? "border-[#382013] bg-[#261309]" : "border-[#ebdcd0] bg-white"}`}>
+            <CardHeader className="flex flex-row items-center justify-between pb-1 space-y-0">
+              <CardTitle className={`text-xs font-black uppercase tracking-wider ${isDarkMode ? "text-[#c2a293]" : "text-[#6e4e3d]"}`}>
                 Solar Energy
               </CardTitle>
-              <div
-                className={`p-2 rounded-xl ${isDarkMode ? "bg-[#3d2314] text-[#d4a373]" : "bg-[#f3e5d8] text-[#3d2314]"}`}
-              >
+              <div className={`p-1.5 rounded-lg ${isDarkMode ? "bg-[#382013] text-amber-400" : "bg-[#f8efe6] text-[#78350f]"}`}>
                 <Sun className="w-4 h-4" />
               </div>
             </CardHeader>
             <CardContent>
-              <div
-                className={`text-3xl font-black mb-1 ${isDarkMode ? "text-[#f3e5d8]" : "text-[#2b180d]"}`}
-              >
-                {solarVoltage}V
+              <div className={`text-3xl font-black mb-1 ${isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"}`}>
+                {station.solarVoltage}V
               </div>
-              <p
-                className={`text-xs font-semibold ${isDarkMode ? "text-[#d4a373]" : "text-[#4a2c11]"}`}
-              >
+              <p className={`text-xs font-semibold ${isDarkMode ? "text-[#a38272]" : "text-[#785948]"}`}>
                 Generating Power
               </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Real-Time Donation Analytics Section */}
-        <Card
-          className={`rounded-3xl shadow-sm ${isDarkMode ? "border-[#3d2314] bg-[#25160f]" : "border-[#e6d5c3] bg-[#fffcf7]"}`}
-        >
+        {/* RESTOCK CONTRIBUTION HEATMAP CALENDAR */}
+        <Card className={`rounded-2xl border ${isDarkMode ? "border-[#382013] bg-[#261309]" : "border-[#ebdcd0] bg-white"}`}>
           <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <PackageCheck
-                  className={`w-5 h-5 ${isDarkMode ? "text-[#d4a373]" : "text-[#3d2314]"}`}
-                />
-                <CardTitle
-                  className={`text-lg font-bold ${isDarkMode ? "text-[#f3e5d8]" : "text-[#2b180d]"}`}
-                >
-                  Real-Time Donation & Supply Analytics
+                <PackageCheck className="w-5 h-5 text-amber-600" />
+                <CardTitle className={`text-base font-extrabold ${isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"}`}>
+                  Restock Contribution Heatmap
                 </CardTitle>
               </div>
-              <CardDescription
-                className={isDarkMode ? "text-[#c4a997]" : "text-[#6b4a36]"}
-              >
-                Transparent log of restocked pet food supplies vs. hopper
-                inventory
+              <CardDescription className={`text-xs font-medium ${isDarkMode ? "text-[#a38272]" : "text-[#785948]"}`}>
+                Click on any tile to inspect daily restock logs and details
               </CardDescription>
             </div>
-            <Badge
-              variant="secondary"
-              className={`rounded-full px-3 py-1 font-bold flex items-center gap-1.5 ${isDarkMode ? "bg-[#3d2314] text-[#d4a373]" : "bg-[#f3e5d8] text-[#3d2314]"}`}
-            >
-              <TrendingUp className="w-3.5 h-3.5" /> 85% Monthly Restock Goal
+            <Badge className={`text-xs font-extrabold px-3 py-1 rounded-full ${
+              isDarkMode ? "bg-[#382013] text-amber-300" : "bg-[#381c0d] text-[#fff8f0]"
+            }`}>
+              142.5 kg Restocked Total
             </Badge>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <div className="flex justify-between text-xs font-bold mb-2">
-                <span
-                  className={isDarkMode ? "text-[#c4a997]" : "text-[#6b4a36]"}
-                >
-                  Monthly Food Supply Restocked:{" "}
-                  {MOCK_DONATION_ANALYTICS.totalRestockedKg} kg
-                </span>
-                <span
-                  className={isDarkMode ? "text-[#d4a373]" : "text-[#3d2314]"}
-                >
-                  Goal: {MOCK_DONATION_ANALYTICS.monthlyGoalKg} kg
-                </span>
-              </div>
-              <Progress
-                value={
-                  (MOCK_DONATION_ANALYTICS.totalRestockedKg /
-                    MOCK_DONATION_ANALYTICS.monthlyGoalKg) *
-                  100
-                }
-                className={`h-3 ${isDarkMode ? "bg-[#3d2314] [&>div]:bg-[#d4a373]" : "bg-[#f3e5d8] [&>div]:bg-[#3d2314]"}`}
-              />
-            </div>
-
-            <div>
-              <h4
-                className={`text-xs font-bold uppercase tracking-wider mb-3 ${isDarkMode ? "text-[#c4a997]" : "text-[#6b4a36]"}`}
-              >
-                Recent Verified Community Contributions
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {MOCK_DONATION_ANALYTICS.recentDonations.map((item) => (
-                  <div
-                    key={item.id}
-                    className={`p-3 rounded-2xl border flex flex-col justify-between ${
-                      isDarkMode
-                        ? "bg-[#1a0f0a]/60 border-[#3d2314]"
-                        : "bg-[#f3e5d8]/40 border-[#e6d5c3]"
-                    }`}
-                  >
-                    <div className="flex justify-between items-center">
-                      <span
-                        className={`text-xs font-bold ${isDarkMode ? "text-[#f3e5d8]" : "text-[#2b180d]"}`}
-                      >
-                        {item.donor}
-                      </span>
-                      <span
-                        className={`text-[10px] ${isDarkMode ? "text-[#c4a997]" : "text-[#6b4a36]"}`}
-                      >
-                        {item.date}
-                      </span>
+          <CardContent>
+            <div className={`p-4 rounded-xl border overflow-x-auto ${isDarkMode ? "bg-[#1f0e06] border-[#382013]" : "bg-[#fbf7f2] border-[#ebdcd0]"}`}>
+              <div className="min-w-[720px]">
+                <div className={`flex text-[11px] font-bold mb-2 pl-7 ${isDarkMode ? "text-[#c2a293]" : "text-[#6e4e3d]"}`}>
+                  {monthsHeader.map((m, idx) => (
+                    <div key={`${m.name}-${idx}`} style={{ flexGrow: m.colSpan, flexBasis: 0 }}>
+                      {m.name}
                     </div>
-                    <span
-                      className={`text-xs font-semibold mt-1 ${isDarkMode ? "text-[#d4a373]" : "text-[#4a2c11]"}`}
-                    >
-                      {item.amount}
-                    </span>
+                  ))}
+                </div>
+
+                <div className="flex gap-2">
+                  <div className={`flex flex-col justify-between text-[10px] font-bold py-1 ${isDarkMode ? "text-[#a38272]" : "text-[#785948]"}`}>
+                    <span>Mon</span>
+                    <span>Wed</span>
+                    <span>Fri</span>
                   </div>
-                ))}
+
+                  <div className="grid grid-rows-7 grid-flow-col gap-[3px] flex-1">
+                    {Array.from({ length: 7 }).map((_, rowIndex) =>
+                      Array.from({ length: 53 }).map((_, colIndex) => {
+                        const dayData = calendarGrid[rowIndex][colIndex];
+                        if (!dayData) return <div key={`empty-${rowIndex}-${colIndex}`} className="w-2.5 h-2.5 opacity-0" />;
+
+                        return (
+                          <button
+                            key={`${dayData.fullDate}-${rowIndex}-${colIndex}`}
+                            onClick={() => setSelectedDay(dayData)}
+                            title={`${dayData.fullDate}: ${dayData.kg} kg restocked`}
+                            className={`w-2.5 h-2.5 rounded-[2px] border cursor-pointer transition-transform hover:scale-125 focus:outline-none ${getHeatmapColor(
+                              dayData.kg,
+                              isDarkMode
+                            )}`}
+                          />
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Charts and Alerts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <Card
-            className={`lg:col-span-2 rounded-3xl shadow-sm ${isDarkMode ? "border-[#3d2314] bg-[#25160f]" : "border-[#e6d5c3] bg-[#fffcf7]"}`}
-          >
-            <CardHeader className="flex flex-row items-center justify-between">
+        {/* Analytics & Station Alerts */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <Card className={`lg:col-span-2 rounded-2xl border ${isDarkMode ? "border-[#382013] bg-[#261309]" : "border-[#ebdcd0] bg-white"}`}>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div>
-                <CardTitle
-                  className={`text-lg font-bold ${isDarkMode ? "text-[#f3e5d8]" : "text-[#2b180d]"}`}
-                >
+                <CardTitle className={`text-base font-extrabold ${isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"}`}>
                   Weekly Stray Visits
                 </CardTitle>
-                <CardDescription
-                  className={isDarkMode ? "text-[#c4a997]" : "text-[#6b4a36]"}
-                >
+                <CardDescription className={`text-xs font-medium ${isDarkMode ? "text-[#a38272]" : "text-[#785948]"}`}>
                   Motion events logged by PawGuard PIR sensors
                 </CardDescription>
               </div>
-              <Badge
-                variant="secondary"
-                className={`rounded-full px-3 font-semibold ${isDarkMode ? "bg-[#3d2314] text-[#d4a373] border-[#4a2c11]" : "bg-[#f3e5d8] text-[#3d2314] border-[#d2ba9e]"}`}
-              >
+              <Badge className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                isDarkMode ? "bg-[#382013] text-amber-300" : "bg-[#f8efe6] text-[#6e4e3d]"
+              }`}>
                 7-Day Overview
               </Badge>
             </CardHeader>
-            <CardContent className="h-64 w-full">
+            <CardContent className="h-56 w-full pt-4">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={analytics?.weeklyVisits || []}>
+                <BarChart data={analytics.weeklyVisits}>
                   <XAxis
                     dataKey="day"
-                    stroke={isDarkMode ? "#d4a373" : "#8c5638"}
-                    fontSize={12}
+                    stroke={isDarkMode ? "#a38272" : "#785948"}
+                    fontSize={11}
+                    fontWeight="700"
+                    axisLine={false}
                     tickLine={false}
                   />
                   <YAxis
-                    stroke={isDarkMode ? "#d4a373" : "#8c5638"}
-                    fontSize={12}
-                    tickLine={false}
+                    stroke={isDarkMode ? "#a38272" : "#785948"}
+                    fontSize={11}
+                    fontWeight="700"
                     axisLine={false}
+                    tickLine={false}
                   />
                   <Tooltip
+                    cursor={{ fill: isDarkMode ? "#382013" : "#fbf4eb" }}
                     contentStyle={{
-                      backgroundColor: isDarkMode ? "#25160f" : "#f3e5d8",
-                      borderRadius: "12px",
-                      borderColor: isDarkMode ? "#d4a373" : "#3d2314",
-                      color: isDarkMode ? "#f3e5d8" : "#2b180d",
-                    }}
-                    cursor={{
-                      fill: isDarkMode
-                        ? "rgba(212, 163, 115, 0.1)"
-                        : "rgba(61, 35, 20, 0.08)",
+                      backgroundColor: isDarkMode ? "#1d1009" : "#ffffff",
+                      borderRadius: "10px",
+                      borderColor: "#d97706",
+                      color: isDarkMode ? "#fff1e6" : "#2e170a",
                     }}
                   />
                   <Bar
                     dataKey="visits"
-                    fill={isDarkMode ? "#d4a373" : "#3d2314"}
-                    radius={[8, 8, 0, 0]}
+                    fill={isDarkMode ? "#d97706" : "#381c0d"}
+                    radius={[6, 6, 0, 0]}
                   />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
 
-          <Card
-            className={`rounded-3xl shadow-sm flex flex-col justify-between ${isDarkMode ? "border-[#3d2314] bg-[#25160f]" : "border-[#e6d5c3] bg-[#fffcf7]"}`}
-          >
-            <CardHeader>
+          <Card className={`rounded-2xl border ${isDarkMode ? "border-[#382013] bg-[#261309]" : "border-[#ebdcd0] bg-white"}`}>
+            <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
-                <BellRing
-                  className={`w-5 h-5 ${isDarkMode ? "text-[#d4a373]" : "text-[#3d2314]"}`}
-                />
-                <CardTitle
-                  className={`text-lg font-bold ${isDarkMode ? "text-[#f3e5d8]" : "text-[#2b180d]"}`}
-                >
+                <BellRing className="w-4 h-4 text-amber-600" />
+                <CardTitle className={`text-base font-extrabold ${isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"}`}>
                   Station Alerts
                 </CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="space-y-3 flex-1">
-              <div
-                className={`p-3 rounded-2xl border flex items-start gap-3 ${isDarkMode ? "bg-[#3d2314]/50 border-[#4a2c11]" : "bg-[#f3e5d8]/80 border-[#d2ba9e]"}`}
-              >
+            <CardContent className="space-y-3">
+              {MOCK_ALERTS.map((alert) => (
                 <div
-                  className={`w-2 h-2 mt-2 rounded-full shrink-0 ${isDarkMode ? "bg-[#d4a373]" : "bg-[#3d2314]"}`}
-                />
-                <div>
-                  <p
-                    className={`text-xs font-bold ${isDarkMode ? "text-[#f3e5d8]" : "text-[#2b180d]"}`}
-                  >
-                    Water Bowl Low
-                  </p>
-                  <p
-                    className={`text-[11px] ${isDarkMode ? "text-[#c4a997]" : "text-[#6b4a36]"}`}
-                  >
-                    Current level is below 45%. Pump refill cycle queued.
-                  </p>
-                </div>
-              </div>
-
-              <div
-                className={`p-3 rounded-2xl border flex items-start gap-3 ${isDarkMode ? "bg-[#1a0f0a]/50 border-[#3d2314]" : "bg-[#f3e5d8]/40 border-[#e6d5c3]"}`}
-              >
-                <div className="w-2 h-2 mt-2 rounded-full bg-[#8c5638] shrink-0" />
-                <div>
-                  <p
-                    className={`text-xs font-bold ${isDarkMode ? "text-[#d4a373]" : "text-[#3d2314]"}`}
-                  >
-                    Scheduled Feed Executed
-                  </p>
-                  <p
-                    className={`text-[11px] ${isDarkMode ? "text-[#c4a997]" : "text-[#6b4a36]"}`}
-                  >
-                    Dispensed 150g portion at 12:00 PM.
+                  key={alert.id}
+                  className={`p-3 rounded-xl border text-xs space-y-1 ${
+                    isDarkMode
+                      ? "bg-[#1f0e06] border-[#3d2315] text-[#fceee6]"
+                      : "bg-[#fdf8f3] border-[#f2e3d8] text-[#3e2314]"
+                  }`}
+                >
+                  <div className="flex items-center gap-2 font-black">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
+                    <span>{alert.title}</span>
+                  </div>
+                  <p className={`pl-3.5 font-medium ${isDarkMode ? "text-[#a38272]" : "text-[#785948]"}`}>
+                    {alert.description}
                   </p>
                 </div>
-              </div>
+              ))}
             </CardContent>
           </Card>
         </div>
-      </main>
+      </div>
 
-      {/* Dashboard Footer */}
-      <footer
-        className={`mt-16 border-t py-8 transition-colors ${isDarkMode ? "border-[#3d2314] bg-[#1a0f0a] text-[#c4a997]" : "border-[#e6d5c3] bg-[#fcf8f2] text-[#6b4a36]"}`}
-      >
-        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3 text-center md:text-left">
-            <div
-              className={`p-2.5 rounded-2xl ${isDarkMode ? "bg-[#3d2314] text-[#d4a373]" : "bg-[#f3e5d8] text-[#3d2314]"}`}
+      {/* CUSTOM TAILWIND MODAL (NO SHADCN DIALOG DEPENDENCY) */}
+      {selectedDay && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div
+            className={`relative w-full max-w-md rounded-2xl border p-6 shadow-xl space-y-4 ${
+              isDarkMode
+                ? "bg-[#231209] border-[#382013] text-[#fceee6]"
+                : "bg-white border-[#ebdcd0] text-[#331c0e]"
+            }`}
+          >
+            <button
+              onClick={() => setSelectedDay(null)}
+              className={`absolute top-4 right-4 p-1 rounded-lg border transition-colors ${
+                isDarkMode
+                  ? "border-[#382013] hover:bg-[#331c0e] text-[#c2a293]"
+                  : "border-[#f4e2d8] hover:bg-[#fbf7f2] text-[#6e4e3d]"
+              }`}
             >
-              <PawPrint className="w-5 h-5" />
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="w-5 h-5 text-amber-600" />
+                <h3 className={`text-lg font-extrabold ${isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"}`}>
+                  Restock Details
+                </h3>
+              </div>
+              <p className={`text-xs font-semibold ${isDarkMode ? "text-[#a38272]" : "text-[#785948]"}`}>
+                {selectedDay.fullDate}
+              </p>
+            </div>
+
+            <div className="space-y-4 py-2">
+              <div
+                className={`p-4 rounded-xl border flex items-center justify-between ${
+                  isDarkMode ? "bg-[#1a0c06] border-[#382013]" : "bg-[#fbf7f2] border-[#ebdcd0]"
+                }`}
+              >
+                <div className="space-y-0.5">
+                  <p className={`text-xs font-bold ${isDarkMode ? "text-[#a38272]" : "text-[#785948]"}`}>
+                    Amount Restocked
+                  </p>
+                  <p className={`text-2xl font-black ${isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"}`}>
+                    {selectedDay.kg} <span className="text-sm font-bold text-amber-600">kg</span>
+                  </p>
+                </div>
+                <Badge
+                  className={`px-3 py-1 font-extrabold text-xs rounded-full ${
+                    selectedDay.kg > 0
+                      ? "bg-amber-600 text-white"
+                      : isDarkMode
+                      ? "bg-[#382013] text-[#a38272]"
+                      : "bg-[#ebdcd0] text-[#785948]"
+                  }`}
+                >
+                  {selectedDay.kg > 0 ? "Active Restock" : "No Activity"}
+                </Badge>
+              </div>
+
+              <div
+                className={`p-3 rounded-xl border text-xs flex items-start gap-2.5 ${
+                  isDarkMode
+                    ? "bg-[#2a160c] border-[#3d2315] text-[#d1b2a3]"
+                    : "bg-[#fffbeb] border-[#fde68a] text-[#5e4334]"
+                }`}
+              >
+                <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <p className="font-medium leading-relaxed">
+                  {selectedDay.kg > 0
+                    ? `Community volunteers replenished ${selectedDay.kg} kg of dry food on this date.`
+                    : "No community food restock was recorded on this date."}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Public Transparency Footer */}
+      <footer
+        className={`w-full mt-8 py-5 px-4 md:px-8 border-t transition-colors ${
+          isDarkMode
+            ? "border-[#382013] bg-[#170c07] text-[#c2a293]"
+            : "border-[#f2e3d8] bg-[#fbf7f2] text-[#6e4e3d]"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-xl ${isDarkMode ? "bg-[#29160c]" : "bg-[#f0e4d8]"}`}>
+              <PawPrint className="w-4 h-4 text-amber-700" />
             </div>
             <div>
-              <p
-                className={`text-sm font-bold ${isDarkMode ? "text-[#f3e5d8]" : "text-[#2b180d]"}`}
-              >
+              <h4 className={`font-black text-sm ${isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"}`}>
                 StraySafe Public Transparency Initiative
-              </p>
-              <p className="text-xs">
-                Empowering community animal welfare through IoT monitoring &
-                open telemetry data.
+              </h4>
+              <p className="font-semibold">
+                Empowering community animal welfare through IoT monitoring & open telemetry data.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 text-xs flex-wrap justify-center">
-            <span className="flex items-center gap-1.5 font-medium">
-              <Activity className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
-              Public Telemetry Active
+          <div className="flex items-center gap-4 font-bold">
+            <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+              <Activity className="w-3.5 h-3.5" /> Public Telemetry Active
             </span>
             <span>•</span>
-
             <button
-              onClick={() =>
-                alert(
-                  "Redirecting to Caretaker / Admin Authentication Portal...",
-                )
-              }
-              className={`flex items-center gap-1 font-semibold hover:underline transition-all ${
-                isDarkMode ? "text-[#d4a373]" : "text-[#3d2314]"
-              }`}
+              onClick={() => alert("Opening Admin Portal...")}
+              className="flex items-center gap-1 hover:underline text-amber-700 dark:text-amber-400"
             >
-              <Lock className="w-3.5 h-3.5" />
-              Admin Access
+              <Lock className="w-3.5 h-3.5" /> Admin Access
             </button>
           </div>
         </div>
