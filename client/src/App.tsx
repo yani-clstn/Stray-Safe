@@ -366,7 +366,6 @@ export default function Dashboard() {
 
   const { calendarGrid, monthsHeader } = generateGithubCalendarData();
 
-  // Compute station open/closed status based on campus operation hours (6:00 AM - 6:00 PM)
   const currentHour = new Date().getHours();
   const isStationOpen = currentHour >= 6 && currentHour < 18;
 
@@ -430,7 +429,6 @@ export default function Dashboard() {
         <header className="sticky top-4 z-50 backdrop-blur-2xl bg-white/90 dark:bg-[#241a14]/90 border border-amber-900/15 dark:border-amber-800/50 rounded-3xl p-3 shadow-xl transition-all duration-300">
           <div className="flex items-center justify-between gap-4">
             
-            {/* Logo & Station Brand */}
             <div
               className="flex items-center gap-3 cursor-pointer group pl-2"
               onClick={() => {
@@ -451,7 +449,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Desktop Navigation Links */}
             <nav className="hidden md:flex items-center gap-1.5 p-1 rounded-2xl border border-amber-900/10 dark:border-amber-800/40 bg-amber-50/80 dark:bg-[#1c140f]/70 backdrop-blur-xl">
               <Button
                 variant="ghost"
@@ -496,7 +493,6 @@ export default function Dashboard() {
               </Button>
             </nav>
 
-            {/* Quick Actions & Controls */}
             <div className="flex items-center gap-2.5 pr-1">
               <Button
                 variant="outline"
@@ -523,7 +519,6 @@ export default function Dashboard() {
                 Station Online
               </Badge>
 
-              {/* Mobile Menu Button */}
               <Button
                 variant="outline"
                 size="icon"
@@ -535,7 +530,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Mobile Collapsible Navigation Menu */}
           {mobileMenuOpen && (
             <div className="md:hidden flex flex-col gap-2 pt-4 mt-3 border-t border-amber-900/15 dark:border-amber-800/40 animate-in slide-in-from-top-2 duration-200">
               <Button
@@ -580,7 +574,6 @@ export default function Dashboard() {
           )}
         </header>
 
-        {/* Dynamic Page Content Router with Smooth Transition */}
         <div className="transition-all duration-500 space-y-6">
         {currentPage === "donate" ? (
           <DonatePage isDarkMode={isDarkMode} />
@@ -588,7 +581,6 @@ export default function Dashboard() {
           <ContributionsPage />
         ) : (
           <>
-            {/* Campus Operation Hours & Station Open/Closed Status Card */}
             <Card className="rounded-3xl border border-amber-900/15 dark:border-amber-800/50 bg-white dark:bg-[#241a14]/80 backdrop-blur-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 overflow-hidden">
               <CardContent className="p-5 md:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3.5">
@@ -627,7 +619,6 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Live Weather Risk Monitor Banner with Card Hover Effect */}
             <Card className={`rounded-3xl border backdrop-blur-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 overflow-hidden ${
               weather.isRainy
                 ? "border-amber-600/40 bg-gradient-to-r from-amber-600/15 via-amber-200/40 dark:via-[#2b1f17]/80 to-white dark:to-[#241a14]"
@@ -669,7 +660,6 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Telemetry Metric Cards with Modern Hover Effects */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="rounded-3xl border border-amber-900/15 dark:border-amber-800/50 bg-white dark:bg-[#241a14]/80 backdrop-blur-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1.5 hover:border-amber-600/40 dark:hover:border-amber-500/50 group">
                 <CardHeader className="flex flex-row items-center justify-between pb-1 space-y-0">
@@ -781,59 +771,66 @@ export default function Dashboard() {
                 </div>
               </CardHeader>
               <CardContent className="pt-4">
-                <div className="p-4 md:p-6 rounded-3xl border border-amber-900/10 dark:border-amber-800/40 bg-amber-50/50 dark:bg-[#1c140f]/70 backdrop-blur-md overflow-x-auto shadow-inner">
-                  <div className="min-w-[720px]">
-                    <div className="flex text-[11px] font-bold mb-3 pl-7 text-amber-800/80 dark:text-amber-400 uppercase tracking-wider">
-                      {monthsHeader.map((m, idx) => (
-                        <div
-                          key={`${m.name}-${idx}`}
-                          style={{ flexGrow: m.colSpan, flexBasis: 0 }}
-                        >
-                          {m.name}
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="flex gap-2">
-                      <div className="flex flex-col justify-between text-[10px] font-bold py-1 text-amber-800/80 dark:text-amber-400 uppercase">
-                        <span>Mon</span>
-                        <span>Wed</span>
-                        <span>Fri</span>
+                <div className="p-4 md:p-6 rounded-3xl border border-amber-900/10 dark:border-amber-800/40 bg-amber-50/50 dark:bg-[#1c140f]/70 backdrop-blur-md shadow-inner space-y-3 overflow-x-auto">
+                  
+                  {/* Month Headers across columns */}
+                  <div className="flex text-[11px] font-bold mb-1 text-amber-800/80 dark:text-amber-400 uppercase tracking-wider min-w-[720px]">
+                    {monthsHeader.map((m, idx) => (
+                      <div
+                        key={`${m.name}-${idx}`}
+                        style={{ flexGrow: m.colSpan, flexBasis: 0 }}
+                      >
+                        {m.name}
                       </div>
+                    ))}
+                  </div>
 
-                      <div className="contrib-grid flex-1">
-                        {Array.from({ length: 7 }).map((_, rowIndex) =>
-                          Array.from({ length: 53 }).map((_, colIndex) => {
-                            const dayData = calendarGrid[rowIndex][colIndex];
-                            if (!dayData)
-                              return (
-                                <div
-                                  key={`empty-${rowIndex}-${colIndex}`}
-                                  className="w-3 h-3 opacity-0"
-                                />
-                              );
-
+                  {/* Horizontal Column Matrix Layout with 7 full rows (Every Day Timeline) */}
+                  <div className="flex gap-1 overflow-x-auto pb-2 min-w-[720px]">
+                    {Array.from({ length: 53 }).map((_, colIndex) => (
+                      <div key={colIndex} className="flex flex-col gap-1">
+                        {Array.from({ length: 7 }).map((_, rowIndex) => {
+                          const dayData = calendarGrid[rowIndex][colIndex];
+                          if (!dayData)
                             return (
-                              <button
-                                key={`${dayData.fullDate}-${rowIndex}-${colIndex}`}
-                                onClick={() => setSelectedDay(dayData)}
-                                title={`${dayData.fullDate}: ${dayData.kg} kg restocked`}
-                                className={`w-3 h-3 rounded-md border cursor-pointer transition-all hover:scale-150 hover:z-20 focus:outline-none ${getHeatmapColor(
-                                  dayData.kg,
-                                  isDarkMode
-                                )}`}
+                              <div
+                                key={`empty-${rowIndex}-${colIndex}`}
+                                className="w-3 h-3 opacity-0"
                               />
                             );
-                          })
-                        )}
+
+                          return (
+                            <button
+                              key={`${dayData.fullDate}-${rowIndex}-${colIndex}`}
+                              onClick={() => setSelectedDay(dayData)}
+                              title={`${dayData.fullDate}: ${dayData.kg} kg restocked`}
+                              className={`w-3 h-3 rounded-full border cursor-pointer transition-all hover:scale-125 hover:z-20 focus:outline-none ${getHeatmapColor(
+                                dayData.kg,
+                                isDarkMode
+                              )}`}
+                            />
+                          );
+                        })}
                       </div>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 text-[11px] text-amber-800/80 dark:text-amber-300 font-medium">
+                    <span>52 weeks contribution history</span>
+                    <div className="flex items-center gap-1.5">
+                      <span>Less</span>
+                      <span className="w-3 h-3 rounded-full bg-amber-200/60 dark:bg-amber-950/30 border border-amber-300/60 dark:border-amber-800/40" />
+                      <span className="w-3 h-3 rounded-full bg-amber-300 dark:bg-amber-900/60" />
+                      <span className="w-3 h-3 rounded-full bg-amber-500 dark:bg-amber-700" />
+                      <span className="w-3 h-3 rounded-full bg-amber-600 dark:bg-amber-600" />
+                      <span className="w-3 h-3 rounded-full bg-amber-700 dark:bg-amber-500" />
+                      <span>More</span>
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Analytics & Station Alerts Matching Target Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card className="lg:col-span-2 rounded-3xl border border-amber-900/15 dark:border-amber-800/50 bg-white dark:bg-[#241a14]/80 backdrop-blur-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -939,7 +936,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* HEATMAP TILE DETAILS MODAL */}
       {selectedDay && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
           <div className="relative w-full max-w-md rounded-3xl border border-amber-900/20 dark:border-amber-800/50 bg-white dark:bg-[#241a14]/95 backdrop-blur-2xl p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-200">
@@ -993,7 +989,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Public Transparency Footer */}
       <footer className="w-full mt-12 py-6 px-4 md:px-8 border-t border-amber-900/15 dark:border-amber-800/40 bg-white/60 dark:bg-[#241a14]/60 backdrop-blur-xl transition-colors">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
           <div className="flex items-center gap-3.5">
