@@ -13,7 +13,6 @@ import {
   Activity,
   PackageCheck,
   Calendar as CalendarIcon,
-  Info,
   X,
   GitCommit,
   CheckCircle2,
@@ -21,10 +20,14 @@ import {
   LayoutDashboard,
   Menu,
   ChevronDown,
+  Sparkles,
+  ShieldCheck,
+  Zap,
+  Info,
 } from "lucide-react";
 import {
-  BarChart,
-  Bar,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   Tooltip,
@@ -125,28 +128,18 @@ const generateGithubCalendarData = () => {
 
 const getHeatmapColor = (kg: number, isDarkMode: boolean) => {
   if (kg === 0) {
-    return isDarkMode
-      ? "bg-[#2d180c] border-[#382013]"
-      : "bg-[#fbf4eb] border-[#ebdcd0]";
+    return isDarkMode ? "bg-amber-950/30 border-amber-800/40" : "bg-amber-200/60 border-amber-300/60";
   }
   if (kg <= 2) {
-    return isDarkMode
-      ? "bg-[#78350f] border-[#92400e]"
-      : "bg-[#fde68a] border-[#fcd34d]";
+    return isDarkMode ? "bg-amber-900/60 border-amber-700/60" : "bg-amber-300 border-amber-400";
   }
   if (kg <= 4) {
-    return isDarkMode
-      ? "bg-[#b45309] border-[#d97706]"
-      : "bg-[#f59e0b] border-[#d97706]";
+    return isDarkMode ? "bg-amber-700 border-amber-600" : "bg-amber-500 border-amber-600";
   }
   if (kg <= 6) {
-    return isDarkMode
-      ? "bg-[#d97706] border-[#f59e0b]"
-      : "bg-[#d97706] border-[#b45309]";
+    return isDarkMode ? "bg-amber-600 border-amber-500" : "bg-amber-600 border-amber-700";
   }
-  return isDarkMode
-    ? "bg-[#f59e0b] border-[#fef3c7]"
-    : "bg-[#381c0d] border-[#251208]";
+  return isDarkMode ? "bg-amber-500 border-amber-400 shadow-sm shadow-amber-500/30" : "bg-amber-700 border-amber-900 shadow-sm shadow-amber-700/30";
 };
 
 const MOCK_STATION = {
@@ -228,7 +221,6 @@ const MOCK_CONTRIBUTION_LOGS = [
   },
 ];
 
-// Dedicated Contributions Timeline Page Component with Date Filter Dropdown
 function ContributionsPage({ isDarkMode }: { isDarkMode: boolean }) {
   const [selectedDateFilter, setSelectedDateFilter] = useState<string>("All Time");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -239,7 +231,6 @@ function ContributionsPage({ isDarkMode }: { isDarkMode: boolean }) {
     ? MOCK_CONTRIBUTION_LOGS
     : MOCK_CONTRIBUTION_LOGS.filter((log) => log.date === selectedDateFilter);
 
-  // Group filtered logs by date for display
   const groupedLogs = filteredLogs.reduce((acc, log) => {
     if (!acc[log.date]) {
       acc[log.date] = [];
@@ -250,66 +241,32 @@ function ContributionsPage({ isDarkMode }: { isDarkMode: boolean }) {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 max-w-5xl mx-auto w-full">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-dashed">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-amber-900/15 dark:border-amber-200/20">
         <div>
-          <h2
-            className={`text-xl font-black flex items-center gap-2 ${
-              isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"
-            }`}
-          >
-            <GitCommit className="w-5 h-5 text-amber-600" /> Restock
-            Contributions Timeline
+          <h2 className="text-lg font-bold tracking-tight flex items-center gap-2 text-amber-950 dark:text-amber-100">
+            <GitCommit className="w-5 h-5 text-amber-600 dark:text-amber-400" /> Restock Contributions Timeline
           </h2>
-          <p
-            className={`text-xs font-medium ${
-              isDarkMode ? "text-[#a38272]" : "text-[#785948]"
-            }`}
-          >
-            History of verified food logs and station replenishment activities
+          <p className="text-xs text-amber-800/80 dark:text-amber-300 font-medium">
+            Auditable history of verified food logs and station replenishment activities
           </p>
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-          <Badge
-            className={`px-3 py-1 text-xs font-extrabold rounded-full hidden md:inline-flex ${
-              isDarkMode
-                ? "bg-[#382013] text-amber-300"
-                : "bg-[#f8efe6] text-[#78350f]"
-            }`}
-          >
-            Branch: main
-          </Badge>
-
-          {/* GitHub-style Date Window Filter Dropdown */}
           <div className="relative">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className={`rounded-xl px-3.5 h-9 text-xs font-bold border gap-2 shadow-sm ${
-                isDarkMode
-                  ? "border-[#382013] bg-[#261309] text-[#fff1e6] hover:bg-[#331c0e]"
-                  : "border-[#ebdcd0] bg-white text-[#2e170a] hover:bg-[#fbf7f2]"
-              }`}
+              className="rounded-xl px-3.5 h-9 text-xs font-semibold border border-amber-900/20 dark:border-amber-700/50 bg-white dark:bg-[#2b1f17] shadow-sm gap-2 backdrop-blur-md transition-all hover:border-amber-600 dark:hover:border-amber-500 text-amber-950 dark:text-amber-100"
             >
-              <CalendarIcon className="w-3.5 h-3.5 text-amber-600" />
+              <CalendarIcon className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
               <span>{selectedDateFilter}</span>
               <ChevronDown className="w-3.5 h-3.5 opacity-70" />
             </Button>
 
             {isDropdownOpen && (
-              <div
-                className={`absolute right-0 mt-2 w-48 rounded-xl border shadow-xl z-50 py-1 animate-in fade-in zoom-in-95 duration-150 ${
-                  isDarkMode
-                    ? "bg-[#261309] border-[#382013] text-[#fff1e6]"
-                    : "bg-white border-[#ebdcd0] text-[#2e170a]"
-                }`}
-              >
-                <div
-                  className={`px-3 py-2 text-[10px] font-black uppercase tracking-wider border-b ${
-                    isDarkMode ? "border-[#382013] text-[#a38272]" : "border-[#f4e2d8] text-[#785948]"
-                  }`}
-                >
+              <div className="absolute right-0 mt-2 w-48 rounded-2xl border border-amber-900/20 dark:border-amber-800/50 bg-white dark:bg-[#241a14] backdrop-blur-xl shadow-2xl z-50 py-1.5 animate-in fade-in zoom-in-95 duration-150">
+                <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-800/70 dark:text-amber-400 border-b border-amber-900/10 dark:border-amber-800/40">
                   Filter by Date Window
                 </div>
                 {dateOptions.map((option) => (
@@ -319,18 +276,14 @@ function ContributionsPage({ isDarkMode }: { isDarkMode: boolean }) {
                       setSelectedDateFilter(option);
                       setIsDropdownOpen(false);
                     }}
-                    className={`w-full text-left px-3.5 py-2 text-xs font-semibold flex items-center justify-between transition-colors ${
+                    className={`w-full text-left px-3.5 py-2 text-xs font-medium flex items-center justify-between transition-colors ${
                       selectedDateFilter === option
-                        ? isDarkMode
-                          ? "bg-[#382013] text-amber-300 font-bold"
-                          : "bg-[#f8efe6] text-amber-800 font-bold"
-                        : isDarkMode
-                        ? "hover:bg-[#2e170e] text-[#d1b2a3]"
-                        : "hover:bg-[#fbf7f2] text-[#5e4334]"
+                        ? "bg-amber-600/15 dark:bg-amber-500/25 text-amber-950 dark:text-amber-50 font-bold"
+                        : "hover:bg-amber-600/10 dark:hover:bg-amber-500/15 text-amber-900/80 dark:text-amber-200"
                     }`}
                   >
                     <span>{option}</span>
-                    {selectedDateFilter === option && <CheckCircle2 className="w-3.5 h-3.5 text-amber-600" />}
+                    {selectedDateFilter === option && <CheckCircle2 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />}
                   </button>
                 ))}
               </div>
@@ -341,90 +294,46 @@ function ContributionsPage({ isDarkMode }: { isDarkMode: boolean }) {
 
       <div className="space-y-6">
         {Object.keys(groupedLogs).length === 0 ? (
-          <div
-            className={`p-8 text-center rounded-2xl border ${
-              isDarkMode ? "border-[#382013] bg-[#261309]" : "border-[#ebdcd0] bg-white"
-            }`}
-          >
-            <p className={`text-sm font-bold ${isDarkMode ? "text-[#a38272]" : "text-[#785948]"}`}>
+          <div className="p-8 text-center rounded-3xl border border-amber-900/20 dark:border-amber-800/40 bg-white dark:bg-[#241a14]/60 backdrop-blur-md">
+            <p className="text-xs text-amber-800/80 dark:text-amber-300 font-medium">
               No contribution logs found for {selectedDateFilter}.
             </p>
           </div>
         ) : (
           Object.entries(groupedLogs).map(([dateGroup, logs]) => (
             <div key={dateGroup} className="space-y-3">
-              <h3
-                className={`text-xs font-black uppercase tracking-wider flex items-center gap-2 px-1 ${
-                  isDarkMode ? "text-[#a38272]" : "text-[#785948]"
-                }`}
-              >
-                <Calendar className="w-3.5 h-3.5" /> Restocks on {dateGroup}
+              <h3 className="text-xs font-bold uppercase tracking-wider flex items-center gap-2 px-1 text-amber-900 dark:text-amber-300">
+                <Calendar className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" /> Restocks on {dateGroup}
               </h3>
 
-              <Card
-                className={`rounded-2xl border overflow-hidden ${
-                  isDarkMode
-                    ? "border-[#382013] bg-[#261309]"
-                    : "border-[#ebdcd0] bg-white"
-                }`}
-              >
-                <CardContent className="p-0 divide-y divide-inherit">
+              <Card className="rounded-3xl border border-amber-900/20 dark:border-amber-800/50 bg-white dark:bg-[#241a14]/80 backdrop-blur-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 hover:border-amber-600/40 dark:hover:border-amber-500/50 overflow-hidden">
+                <CardContent className="p-0 divide-y divide-amber-900/10 dark:divide-amber-800/40">
                   {logs.map((log) => (
                     <div
                       key={log.id}
-                      className={`p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 transition-colors ${
-                        isDarkMode ? "hover:bg-[#2e170e]" : "hover:bg-[#fbf7f2]"
-                      }`}
+                      className="p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 transition-colors hover:bg-amber-600/10 dark:hover:bg-amber-500/10"
                     >
                       <div className="space-y-1">
-                        <p
-                          className={`text-sm font-extrabold hover:text-amber-600 cursor-pointer ${
-                            isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"
-                          }`}
-                        >
+                        <p className="text-sm font-semibold tracking-tight text-amber-950 dark:text-amber-100 hover:text-amber-700 dark:hover:text-amber-300 cursor-pointer transition-colors">
                           {log.title}
                         </p>
-                        <div className="flex items-center gap-2 text-xs font-medium">
-                          <span
-                            className={
-                              isDarkMode ? "text-[#c2a293]" : "text-[#6e4e3d]"
-                            }
-                          >
-                            {log.author}
-                          </span>
+                        <div className="flex items-center gap-2 text-xs font-medium text-amber-800/80 dark:text-amber-300">
+                          <span className="text-amber-950 dark:text-amber-100 font-semibold">{log.author}</span>
                           <span>•</span>
-                          <span
-                            className={
-                              isDarkMode ? "text-[#a38272]" : "text-[#785948]"
-                            }
-                          >
-                            contributed {log.timeAgo}
-                          </span>
+                          <span>contributed {log.timeAgo}</span>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3 self-end md:self-center">
-                        <Badge className="bg-emerald-600/20 text-emerald-500 border border-emerald-600/30 text-[10px] font-bold">
+                        <Badge className="px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 shadow-none">
                           <CheckCircle2 className="w-3 h-3 mr-1" /> {log.status}
                         </Badge>
 
-                        <span
-                          className={`text-xs font-black px-2.5 py-1 rounded-lg border ${
-                            isDarkMode
-                              ? "bg-[#1c0f08] border-[#382013] text-amber-400"
-                              : "bg-[#fdfbf7] border-[#ebdcd0] text-amber-700"
-                          }`}
-                        >
+                        <span className="text-xs font-bold px-2.5 py-1 rounded-xl border border-amber-600/30 dark:border-amber-500/30 bg-amber-600/15 dark:bg-amber-500/20 text-amber-900 dark:text-amber-200">
                           +{log.kg} kg
                         </span>
 
-                        <code
-                          className={`text-[11px] font-mono px-2 py-1 rounded border ${
-                            isDarkMode
-                              ? "bg-[#1c0f08] border-[#382013] text-[#a38272]"
-                              : "bg-[#f5eeeb] border-[#e2d5ca] text-[#785948]"
-                          }`}
-                        >
+                        <code className="text-[11px] font-mono px-2 py-1 rounded-lg border border-amber-900/20 dark:border-amber-800/50 bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-200">
                           {log.hash}
                         </code>
                       </div>
@@ -509,105 +418,44 @@ export default function Dashboard() {
   const analytics = MOCK_ANALYTICS;
 
   return (
-    <div
-      className={`min-h-screen flex flex-col justify-between transition-colors duration-300 font-sans ${
-        isDarkMode
-          ? "bg-[#1d1009] text-[#fceee6]"
-          : "bg-[#fdfbf7] text-[#331c0e]"
-      }`}
-    >
+    <div className={`min-h-screen flex flex-col justify-between transition-colors duration-300 font-sans antialiased selection:bg-amber-600/30 selection:text-amber-900 dark:selection:text-amber-100 overflow-y-auto scroll-smooth ${isDarkMode ? "bg-[#18110c] text-amber-100" : "bg-[#fcf8f5] text-amber-950"}`}>
       <div className="p-4 md:p-8 max-w-7xl mx-auto w-full space-y-6">
-        {/* Header with Professional Responsive Navigation */}
-        <header
-          className={`flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b-2 gap-4 ${
-            isDarkMode ? "border-[#382013]" : "border-[#f4e2d8]"
-          }`}
-        >
-          <div className="flex items-center justify-between w-full md:w-auto">
+        
+        {/* Sleek Floating Navigation Bar */}
+        <header className="sticky top-4 z-50 backdrop-blur-2xl bg-white/90 dark:bg-[#241a14]/90 border border-amber-900/15 dark:border-amber-800/50 rounded-3xl p-3 shadow-xl transition-all duration-300">
+          <div className="flex items-center justify-between gap-4">
+            
+            {/* Logo & Station Brand */}
             <div
-              className="flex items-center gap-3.5 cursor-pointer"
+              className="flex items-center gap-3 cursor-pointer group pl-2"
               onClick={() => {
                 setCurrentPage("dashboard");
                 setMobileMenuOpen(false);
               }}
             >
-              <div
-                className={`p-3.5 rounded-2xl shadow-sm ${
-                  isDarkMode
-                    ? "bg-[#331c0e] text-[#fca5a5]"
-                    : "bg-[#381c0d] text-[#fff8f0]"
-                }`}
-              >
-                <PawPrint className="w-7 h-7" />
+              <div className="p-2.5 rounded-2xl bg-gradient-to-br from-amber-600 to-amber-800 text-white shadow-lg shadow-amber-900/20 group-hover:scale-105 transition-transform duration-300">
+                <PawPrint className="w-5 h-5" />
               </div>
-              <div>
-                <h1
-                  className={`text-2xl md:text-3xl font-black tracking-tight flex items-center gap-2 ${
-                    isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"
-                  }`}
-                >
-                  STRAY SAFE <HeartHandshake className="w-5 h-5 text-amber-700 fill-amber-700" />
+              <div className="hidden sm:block">
+                <h1 className="text-base font-black tracking-tight flex items-center gap-1.5 text-amber-950 dark:text-amber-50">
+                  STRAY SAFE
                 </h1>
-                <p className={`text-xs md:text-sm font-semibold ${isDarkMode ? "text-[#c2a293]" : "text-[#6e4e3d]"}`}>
-                  Station:{" "}
-                  <span className="font-bold">
-                    {station.name} ({station.subLocation})
-                  </span>
+                <p className="text-[11px] text-amber-800/80 dark:text-amber-300 font-medium">
+                  {station.name} ({station.subLocation})
                 </p>
               </div>
             </div>
 
-            {/* Mobile Hamburger Toggle */}
-            <div className="flex items-center gap-2 md:hidden">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setIsDarkMode(!isDarkMode)}
-                className={`rounded-full h-9 w-9 border ${
-                  isDarkMode
-                    ? "border-[#382013] bg-[#29160b] text-amber-400"
-                    : "border-[#e2d5ca] bg-[#f8efe6] text-[#52301c]"
-                }`}
-              >
-                {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              </Button>
-
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`rounded-full h-9 w-9 border ${
-                  isDarkMode
-                    ? "border-[#382013] bg-[#29160b] text-[#fceee6]"
-                    : "border-[#e2d5ca] bg-white text-[#3e2314]"
-                }`}
-              >
-                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </Button>
-            </div>
-          </div>
-
-          {/* Desktop Navigation & Actions */}
-          <div className="hidden md:flex items-center gap-2.5 flex-wrap">
-            <nav
-              className={`flex items-center gap-1 p-1 rounded-full border ${
-                isDarkMode
-                  ? "bg-[#261309] border-[#382013]"
-                  : "bg-[#f8efe6] border-[#ebdcd0]"
-              }`}
-            >
+            {/* Desktop Navigation Links */}
+            <nav className="hidden md:flex items-center gap-1.5 p-1 rounded-2xl border border-amber-900/10 dark:border-amber-800/40 bg-amber-50/80 dark:bg-[#1c140f]/70 backdrop-blur-xl">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setCurrentPage("dashboard")}
-                className={`rounded-full px-4 h-9 text-xs font-bold transition-all ${
+                className={`rounded-xl px-4 h-9 text-xs font-bold transition-all duration-300 ${
                   currentPage === "dashboard"
-                    ? isDarkMode
-                      ? "bg-[#382013] text-amber-300 shadow-sm"
-                      : "bg-[#381c0d] text-[#fff8f0] shadow-sm"
-                    : isDarkMode
-                    ? "text-[#c2a293] hover:text-[#fff1e6]"
-                    : "text-[#6e4e3d] hover:text-[#2e170a]"
+                    ? "bg-amber-600 text-white shadow-md shadow-amber-600/30 hover:bg-amber-700 hover:text-white"
+                    : "text-amber-900/80 dark:text-amber-200 hover:text-amber-950 dark:hover:text-amber-50 hover:bg-amber-600/15"
                 }`}
               >
                 <LayoutDashboard className="w-3.5 h-3.5 mr-1.5" />
@@ -618,14 +466,10 @@ export default function Dashboard() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setCurrentPage("contributions")}
-                className={`rounded-full px-4 h-9 text-xs font-bold transition-all ${
+                className={`rounded-xl px-4 h-9 text-xs font-bold transition-all duration-300 ${
                   currentPage === "contributions"
-                    ? isDarkMode
-                      ? "bg-[#382013] text-amber-300 shadow-sm"
-                      : "bg-[#381c0d] text-[#fff8f0] shadow-sm"
-                    : isDarkMode
-                    ? "text-[#c2a293] hover:text-[#fff1e6]"
-                    : "text-[#6e4e3d] hover:text-[#2e170a]"
+                    ? "bg-amber-600 text-white shadow-md shadow-amber-600/30 hover:bg-amber-700 hover:text-white"
+                    : "text-amber-900/80 dark:text-amber-200 hover:text-amber-950 dark:hover:text-amber-50 hover:bg-amber-600/15"
                 }`}
               >
                 <GitCommit className="w-3.5 h-3.5 mr-1.5" />
@@ -636,14 +480,10 @@ export default function Dashboard() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setCurrentPage("donate")}
-                className={`rounded-full px-4 h-9 text-xs font-bold transition-all ${
+                className={`rounded-xl px-4 h-9 text-xs font-bold transition-all duration-300 ${
                   currentPage === "donate"
-                    ? isDarkMode
-                      ? "bg-[#382013] text-amber-300 shadow-sm"
-                      : "bg-[#381c0d] text-[#fff8f0] shadow-sm"
-                    : isDarkMode
-                    ? "text-[#c2a293] hover:text-[#fff1e6]"
-                    : "text-[#6e4e3d] hover:text-[#2e170a]"
+                    ? "bg-amber-600 text-white shadow-md shadow-amber-600/30 hover:bg-amber-700 hover:text-white"
+                    : "text-amber-900/80 dark:text-amber-200 hover:text-amber-950 dark:hover:text-amber-50 hover:bg-amber-600/15"
                 }`}
               >
                 <HeartHandshake className="w-3.5 h-3.5 mr-1.5" />
@@ -651,71 +491,59 @@ export default function Dashboard() {
               </Button>
             </nav>
 
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={fetchWeather}
-              className={`rounded-full h-10 w-10 border ${
-                isDarkMode
-                  ? "border-[#382013] bg-[#29160b] text-[#fceee6]"
-                  : "border-[#e2d5ca] bg-white text-[#3e2314]"
-              }`}
-              title="Refresh Telemetry & Weather"
-            >
-              <RefreshCw className={`w-4 h-4 ${weather.isLoading ? "animate-spin" : ""}`} />
-            </Button>
+            {/* Quick Actions & Controls */}
+            <div className="flex items-center gap-2.5 pr-1">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={fetchWeather}
+                className="rounded-2xl h-9 w-9 border border-amber-900/15 dark:border-amber-700/50 bg-white dark:bg-[#2b1f17] shadow-sm hover:border-amber-600 dark:hover:border-amber-500 transition-all text-amber-950 dark:text-amber-100"
+                title="Refresh Telemetry & Weather"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${weather.isLoading ? "animate-spin" : ""}`} />
+              </Button>
 
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className={`rounded-full h-10 w-10 border ${
-                isDarkMode
-                  ? "border-[#382013] bg-[#29160b] text-amber-400"
-                  : "border-[#e2d5ca] bg-[#f8efe6] text-[#52301c]"
-              }`}
-              title="Toggle Theme"
-            >
-              {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="rounded-2xl h-9 w-9 border border-amber-900/15 dark:border-amber-700/50 bg-white dark:bg-[#2b1f17] shadow-sm hover:border-amber-600 dark:hover:border-amber-500 transition-all text-amber-950 dark:text-amber-100"
+                title="Toggle Theme"
+              >
+                {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-amber-800" />}
+              </Button>
 
-            <Badge
-              variant="outline"
-              className={`px-3 py-1.5 rounded-full gap-2 text-xs font-bold border ${
-                isDarkMode
-                  ? "bg-[#2d180c] border-[#d97706]/40 text-[#fcd34d]"
-                  : "bg-[#fbf4eb] border-[#e2c7b5] text-[#4a2815]"
-              }`}
-            >
-              <span className="w-2 h-2 rounded-full bg-amber-600 animate-pulse" />
-              Station Online
-            </Badge>
+              <Badge className="hidden lg:flex px-3.5 py-1.5 rounded-2xl gap-2 text-xs font-semibold bg-amber-600/15 text-amber-900 dark:text-amber-200 border border-amber-600/30 shadow-none">
+                <span className="w-2 h-2 rounded-full bg-amber-600 dark:bg-amber-400 animate-pulse shadow-sm shadow-amber-600" />
+                Station Online
+              </Badge>
+
+              {/* Mobile Menu Button */}
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="rounded-2xl h-9 w-9 md:hidden border border-amber-900/15 dark:border-amber-700/50 bg-white dark:bg-[#2b1f17] shadow-sm text-amber-950 dark:text-amber-100"
+              >
+                {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              </Button>
+            </div>
           </div>
 
           {/* Mobile Collapsible Navigation Menu */}
           {mobileMenuOpen && (
-            <div
-              className={`w-full md:hidden flex flex-col gap-2 p-4 rounded-2xl border animate-in slide-in-from-top-2 duration-200 ${
-                isDarkMode
-                  ? "bg-[#261309] border-[#382013]"
-                  : "bg-white border-[#ebdcd0]"
-              }`}
-            >
+            <div className="md:hidden flex flex-col gap-2 pt-4 mt-3 border-t border-amber-900/15 dark:border-amber-800/40 animate-in slide-in-from-top-2 duration-200">
               <Button
                 variant="ghost"
                 onClick={() => {
                   setCurrentPage("dashboard");
                   setMobileMenuOpen(false);
                 }}
-                className={`justify-start font-bold rounded-xl ${
-                  currentPage === "dashboard"
-                    ? isDarkMode
-                      ? "bg-[#382013] text-amber-300"
-                      : "bg-[#f8efe6] text-[#78350f]"
-                    : ""
+                className={`justify-start font-bold text-xs rounded-2xl ${
+                  currentPage === "dashboard" ? "bg-amber-600/20 text-amber-950 dark:text-amber-50" : "text-amber-900/80 dark:text-amber-200"
                 }`}
               >
-                <LayoutDashboard className="w-4 h-4 mr-2" /> Dashboard
+                <LayoutDashboard className="w-3.5 h-3.5 mr-2" /> Dashboard
               </Button>
 
               <Button
@@ -724,15 +552,11 @@ export default function Dashboard() {
                   setCurrentPage("contributions");
                   setMobileMenuOpen(false);
                 }}
-                className={`justify-start font-bold rounded-xl ${
-                  currentPage === "contributions"
-                    ? isDarkMode
-                      ? "bg-[#382013] text-amber-300"
-                      : "bg-[#f8efe6] text-[#78350f]"
-                    : ""
+                className={`justify-start font-bold text-xs rounded-2xl ${
+                  currentPage === "contributions" ? "bg-amber-600/20 text-amber-950 dark:text-amber-50" : "text-amber-900/80 dark:text-amber-200"
                 }`}
               >
-                <GitCommit className="w-4 h-4 mr-2" /> Contributions Timeline
+                <GitCommit className="w-3.5 h-3.5 mr-2" /> Contributions Timeline
               </Button>
 
               <Button
@@ -741,85 +565,50 @@ export default function Dashboard() {
                   setCurrentPage("donate");
                   setMobileMenuOpen(false);
                 }}
-                className={`justify-start font-bold rounded-xl ${
-                  currentPage === "donate"
-                    ? isDarkMode
-                      ? "bg-[#382013] text-amber-300"
-                      : "bg-[#f8efe6] text-[#78350f]"
-                    : ""
+                className={`justify-start font-bold text-xs rounded-2xl ${
+                  currentPage === "donate" ? "bg-amber-600/20 text-amber-950 dark:text-amber-50" : "text-amber-900/80 dark:text-amber-200"
                 }`}
               >
-                <HeartHandshake className="w-4 h-4 mr-2" /> Donate Cat Food
+                <HeartHandshake className="w-3.5 h-3.5 mr-2" /> Donate Cat Food
               </Button>
-
-              <div className="pt-2 border-t border-dashed flex items-center justify-between">
-                <span className="text-xs font-semibold opacity-75">Telemetry Actions</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={fetchWeather}
-                  className="rounded-lg h-8 text-xs"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${weather.isLoading ? "animate-spin" : ""}`} /> Refresh Data
-                </Button>
-              </div>
             </div>
           )}
         </header>
 
-        {/* Dynamic Page Content Router */}
+        {/* Dynamic Page Content Router with Smooth Transition */}
+        <div className="transition-all duration-500 space-y-6">
         {currentPage === "donate" ? (
           <DonatePage isDarkMode={isDarkMode} />
         ) : currentPage === "contributions" ? (
           <ContributionsPage isDarkMode={isDarkMode} />
         ) : (
           <>
-            {/* Live Weather Risk Monitor Banner */}
-            <Card
-              className={`rounded-2xl border transition-colors ${
-                weather.isRainy
-                  ? isDarkMode
-                    ? "border-[#b45309]/50 bg-[#29160c]"
-                    : "border-[#f59e0b]/60 bg-[#fffbeb]"
-                  : weather.isHighHeat
-                  ? isDarkMode
-                    ? "border-red-900/50 bg-[#2b1010]"
-                    : "border-red-300 bg-red-50"
-                  : isDarkMode
-                  ? "border-[#382013] bg-[#261309]"
-                  : "border-[#ebdcd0] bg-white"
-              }`}
-            >
-              <CardContent className="p-4 md:p-5 space-y-3">
+            {/* Live Weather Risk Monitor Banner with Card Hover Effect */}
+            <Card className={`rounded-3xl border backdrop-blur-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 overflow-hidden ${
+              weather.isRainy
+                ? "border-amber-600/40 bg-gradient-to-r from-amber-600/15 via-amber-200/40 dark:via-[#2b1f17]/80 to-white dark:to-[#241a14]"
+                : weather.isHighHeat
+                ? "border-amber-700/40 bg-gradient-to-r from-amber-700/15 via-amber-200/40 dark:via-[#2b1f17]/80 to-white dark:to-[#241a14]"
+                : "border-amber-900/15 dark:border-amber-800/50 bg-white dark:bg-[#241a14]/80"
+            }`}>
+              <CardContent className="p-5 md:p-6 space-y-3">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle
-                      className={`w-5 h-5 shrink-0 ${
-                        weather.isRainy || weather.isHighHeat
-                          ? "text-amber-600"
-                          : "text-emerald-600"
-                      }`}
-                    />
-                    <h3
-                      className={`text-sm font-extrabold ${
-                        isDarkMode ? "text-[#fef3c7]" : "text-[#2e170a]"
-                      }`}
-                    >
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 rounded-2xl border border-amber-600/30 bg-amber-600/15 text-amber-800 dark:text-amber-300">
+                      <AlertTriangle className="w-4 h-4 shrink-0" />
+                    </div>
+                    <h3 className="text-sm font-bold tracking-tight text-amber-950 dark:text-amber-50">
                       Campus Weather Risk Monitor (Live)
                     </h3>
                   </div>
-                  <Badge className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs px-3 py-1 rounded-full">
+                  <Badge className="px-3 py-1 text-xs font-semibold rounded-full bg-amber-600/15 text-amber-900 dark:text-amber-200 border border-amber-600/30 shadow-none">
                     {weather.isLoading
                       ? "Fetching Live Data..."
                       : `${weather.condition} • ${weather.temp}°C`}
                   </Badge>
                 </div>
 
-                <p
-                  className={`text-xs md:text-sm font-medium ${
-                    isDarkMode ? "text-[#d1b2a3]" : "text-[#5e4334]"
-                  }`}
-                >
+                <p className="text-xs text-amber-900/80 dark:text-amber-200 font-medium leading-relaxed">
                   {weather.isRainy
                     ? "Rainfall detected or expected near CvSU Imus Campus. Relocate feeder to covered shelter."
                     : weather.isHighHeat
@@ -828,259 +617,129 @@ export default function Dashboard() {
                 </p>
 
                 {weather.isRainy && (
-                  <div
-                    className={`p-2.5 rounded-xl border flex items-center gap-2 text-xs font-bold ${
-                      isDarkMode
-                        ? "bg-[#331a0b] border-[#5e3215] text-amber-400"
-                        : "bg-[#fef3c7]/60 border-[#fde68a] text-amber-900"
-                    }`}
-                  >
-                    <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-600" />
+                  <div className="p-3 rounded-2xl border bg-amber-600/15 border-amber-600/30 flex items-center gap-2.5 text-xs font-semibold text-amber-900 dark:text-amber-200">
+                    <Zap className="w-4 h-4 shrink-0" />
                     <span>Relocation Protocol Triggered: Notify Caretakers</span>
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            {/* Telemetry Metric Cards */}
+            {/* Telemetry Metric Cards with Modern Hover Effects */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card
-                className={`rounded-2xl border ${
-                  isDarkMode
-                    ? "border-[#382013] bg-[#261309]"
-                    : "border-[#ebdcd0] bg-white"
-                }`}
-              >
+              <Card className="rounded-3xl border border-amber-900/15 dark:border-amber-800/50 bg-white dark:bg-[#241a14]/80 backdrop-blur-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1.5 hover:border-amber-600/40 dark:hover:border-amber-500/50 group">
                 <CardHeader className="flex flex-row items-center justify-between pb-1 space-y-0">
-                  <CardTitle
-                    className={`text-xs font-black uppercase tracking-wider ${
-                      isDarkMode ? "text-[#c2a293]" : "text-[#6e4e3d]"
-                    }`}
-                  >
+                  <CardTitle className="text-xs font-bold uppercase tracking-wider text-amber-800/80 dark:text-amber-300">
                     Food Stock
                   </CardTitle>
-                  <div
-                    className={`p-1.5 rounded-lg ${
-                      isDarkMode
-                        ? "bg-[#382013] text-amber-400"
-                        : "bg-[#f8efe6] text-[#78350f]"
-                    }`}
-                  >
+                  <div className="p-2 rounded-2xl border border-amber-600/30 bg-amber-600/15 text-amber-800 dark:text-amber-300 transition-transform duration-300 group-hover:scale-110">
                     <Utensils className="w-4 h-4" />
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div
-                    className={`text-3xl font-black ${
-                      isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"
-                    }`}
-                  >
+                <CardContent className="space-y-3 pt-2">
+                  <div className="text-3xl font-black tracking-tight text-amber-950 dark:text-amber-50">
                     {station.foodLevel}%
                   </div>
                   <Progress
                     value={station.foodLevel}
-                    className={`h-2.5 rounded-full ${
-                      isDarkMode ? "bg-[#382013]" : "bg-[#f4e8df]"
-                    } [&>div]:bg-amber-500`}
+                    className="h-2.5 rounded-full bg-amber-900/10 dark:bg-amber-950/80 [&>div]:bg-gradient-to-r [&>div]:from-amber-600 [&>div]:to-amber-800 dark:[&>div]:from-amber-500 dark:[&>div]:to-amber-600"
                   />
                 </CardContent>
               </Card>
 
-              <Card
-                className={`rounded-2xl border ${
-                  isDarkMode
-                    ? "border-[#382013] bg-[#261309]"
-                    : "border-[#ebdcd0] bg-white"
-                }`}
-              >
+              <Card className="rounded-3xl border border-amber-900/15 dark:border-amber-800/50 bg-white dark:bg-[#241a14]/80 backdrop-blur-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1.5 hover:border-amber-600/40 dark:hover:border-amber-500/50 group">
                 <CardHeader className="flex flex-row items-center justify-between pb-1 space-y-0">
-                  <CardTitle
-                    className={`text-xs font-black uppercase tracking-wider ${
-                      isDarkMode ? "text-[#c2a293]" : "text-[#6e4e3d]"
-                    }`}
-                  >
+                  <CardTitle className="text-xs font-bold uppercase tracking-wider text-amber-800/80 dark:text-amber-300">
                     Water Level
                   </CardTitle>
-                  <div
-                    className={`p-1.5 rounded-lg ${
-                      isDarkMode
-                        ? "bg-[#382013] text-sky-400"
-                        : "bg-[#f8efe6] text-[#78350f]"
-                    }`}
-                  >
+                  <div className="p-2 rounded-2xl border border-amber-600/30 bg-amber-600/15 text-amber-800 dark:text-amber-300 transition-transform duration-300 group-hover:scale-110">
                     <Droplets className="w-4 h-4" />
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div
-                    className={`text-3xl font-black ${
-                      isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"
-                    }`}
-                  >
+                <CardContent className="space-y-3 pt-2">
+                  <div className="text-3xl font-black tracking-tight text-amber-950 dark:text-amber-50">
                     {station.waterLevel}%
                   </div>
                   <Progress
                     value={station.waterLevel}
-                    className={`h-2.5 rounded-full ${
-                      isDarkMode ? "bg-[#382013]" : "bg-[#f4e8df]"
-                    } [&>div]:bg-sky-500`}
+                    className="h-2.5 rounded-full bg-amber-900/10 dark:bg-amber-950/80 [&>div]:bg-gradient-to-r [&>div]:from-amber-600 [&>div]:to-amber-800 dark:[&>div]:from-amber-500 dark:[&>div]:to-amber-600"
                   />
                 </CardContent>
               </Card>
 
-              <Card
-                className={`rounded-2xl border ${
-                  isDarkMode
-                    ? "border-[#382013] bg-[#261309]"
-                    : "border-[#ebdcd0] bg-white"
-                }`}
-              >
+              <Card className="rounded-3xl border border-amber-900/15 dark:border-amber-800/50 bg-white dark:bg-[#241a14]/80 backdrop-blur-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1.5 hover:border-amber-600/40 dark:hover:border-amber-500/50 group">
                 <CardHeader className="flex flex-row items-center justify-between pb-1 space-y-0">
-                  <CardTitle
-                    className={`text-xs font-black uppercase tracking-wider ${
-                      isDarkMode ? "text-[#c2a293]" : "text-[#6e4e3d]"
-                    }`}
-                  >
+                  <CardTitle className="text-xs font-bold uppercase tracking-wider text-amber-800/80 dark:text-amber-300">
                     Battery Percentage
                   </CardTitle>
-                  <div
-                    className={`p-1.5 rounded-lg ${
-                      isDarkMode
-                        ? "bg-[#382013] text-emerald-400"
-                        : "bg-[#f8efe6] text-[#78350f]"
-                    }`}
-                  >
+                  <div className="p-2 rounded-2xl border border-amber-600/30 bg-amber-600/15 text-amber-800 dark:text-amber-300 transition-transform duration-300 group-hover:scale-110">
                     <Battery className="w-4 h-4" />
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div
-                    className={`text-3xl font-black mb-1 ${
-                      isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"
-                    }`}
-                  >
+                <CardContent className="pt-2">
+                  <div className="text-3xl font-black tracking-tight mb-1 text-amber-950 dark:text-amber-50">
                     {station.batteryPercentage}%
                   </div>
-                  <p
-                    className={`text-xs font-semibold ${
-                      isDarkMode ? "text-[#a38272]" : "text-[#785948]"
-                    }`}
-                  >
-                    Optimal Charge State
+                  <p className="text-xs text-amber-800/80 dark:text-amber-300 font-medium flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" /> Optimal Charge State
                   </p>
                 </CardContent>
               </Card>
 
-              <Card
-                className={`rounded-2xl border ${
-                  isDarkMode
-                    ? "border-[#382013] bg-[#261309]"
-                    : "border-[#ebdcd0] bg-white"
-                }`}
-              >
+              <Card className="rounded-3xl border border-amber-900/15 dark:border-amber-800/50 bg-white dark:bg-[#241a14]/80 backdrop-blur-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1.5 hover:border-amber-600/40 dark:hover:border-amber-500/50 group">
                 <CardHeader className="flex flex-row items-center justify-between pb-1 space-y-0">
-                  <CardTitle
-                    className={`text-xs font-black uppercase tracking-wider ${
-                      isDarkMode ? "text-[#c2a293]" : "text-[#6e4e3d]"
-                    }`}
-                  >
+                  <CardTitle className="text-xs font-bold uppercase tracking-wider text-amber-800/80 dark:text-amber-300">
                     Solar Energy
                   </CardTitle>
-                  <div
-                    className={`p-1.5 rounded-lg ${
-                      isDarkMode
-                        ? "bg-[#382013] text-amber-400"
-                        : "bg-[#f8efe6] text-[#78350f]"
-                    }`}
-                  >
+                  <div className="p-2 rounded-2xl border border-amber-600/30 bg-amber-600/15 text-amber-800 dark:text-amber-300 transition-transform duration-300 group-hover:scale-110">
                     <Sun className="w-4 h-4" />
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div
-                    className={`text-3xl font-black mb-1 ${
-                      isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"
-                    }`}
-                  >
+                <CardContent className="pt-2">
+                  <div className="text-3xl font-black tracking-tight mb-1 text-amber-950 dark:text-amber-50">
                     {station.solarVoltage}V
                   </div>
-                  <p
-                    className={`text-xs font-semibold ${
-                      isDarkMode ? "text-[#a38272]" : "text-[#785948]"
-                    }`}
-                  >
-                    Generating Power
+                  <p className="text-xs text-amber-800/80 dark:text-amber-300 font-medium flex items-center gap-1.5">
+                    <Zap className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" /> Generating Power
                   </p>
                 </CardContent>
               </Card>
             </div>
 
             {/* RESTOCK CONTRIBUTION HEATMAP CALENDAR */}
-            <Card
-              className={`rounded-2xl border ${
-                isDarkMode
-                  ? "border-[#382013] bg-[#261309]"
-                  : "border-[#ebdcd0] bg-white"
-              }`}
-            >
-              <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <Card className="rounded-3xl border border-amber-900/15 dark:border-amber-800/50 bg-white dark:bg-[#241a14]/80 backdrop-blur-xl shadow-lg transition-all duration-300 hover:shadow-xl">
+              <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2">
                 <div>
                   <div className="flex items-center gap-2">
-                    <PackageCheck className="w-5 h-5 text-amber-600" />
-                    <CardTitle
-                      className={`text-base font-extrabold ${
-                        isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"
-                      }`}
-                    >
+                    <div className="p-2 rounded-2xl border border-amber-600/30 bg-amber-600/15 text-amber-800 dark:text-amber-300">
+                      <PackageCheck className="w-4 h-4" />
+                    </div>
+                    <CardTitle className="text-base font-bold tracking-tight text-amber-950 dark:text-amber-50">
                       Restock Contribution Heatmap
                     </CardTitle>
                   </div>
-                  <CardDescription
-                    className={`text-xs font-medium ${
-                      isDarkMode ? "text-[#a38272]" : "text-[#785948]"
-                    }`}
-                  >
+                  <CardDescription className="text-xs text-amber-800/80 dark:text-amber-300 font-medium mt-1">
                     Click on any tile to inspect daily restock logs and details
                   </CardDescription>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setCurrentPage("contributions")}
-                    className={`rounded-full h-8 px-3 text-xs font-bold border ${
-                      isDarkMode
-                        ? "border-[#382013] bg-[#1f0e06] text-amber-400"
-                        : "border-[#ebdcd0] bg-white text-amber-800"
-                    }`}
+                    className="rounded-2xl h-9 px-3.5 text-xs font-bold border border-amber-900/15 dark:border-amber-700/50 bg-white dark:bg-[#2b1f17] shadow-sm backdrop-blur-md hover:border-amber-600 dark:hover:border-amber-500 transition-all text-amber-950 dark:text-amber-100"
                   >
-                    <GitCommit className="w-3.5 h-3.5 mr-1" /> View Timeline Page
+                    <GitCommit className="w-3.5 h-3.5 mr-1.5 text-amber-600 dark:text-amber-400" /> View Timeline Page
                   </Button>
-                  <Badge
-                    className={`text-xs font-extrabold px-3 py-1 rounded-full ${
-                      isDarkMode
-                        ? "bg-[#382013] text-amber-300"
-                        : "bg-[#381c0d] text-[#fff8f0]"
-                    }`}
-                  >
+                  <Badge className="px-3 py-1 text-xs font-semibold rounded-full bg-amber-600/15 text-amber-900 dark:text-amber-200 border border-amber-600/30 shadow-none">
                     142.5 kg Restocked Total
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div
-                  className={`p-4 rounded-xl border overflow-x-auto ${
-                    isDarkMode
-                      ? "bg-[#1f0e06] border-[#382013]"
-                      : "bg-[#fbf7f2] border-[#ebdcd0]"
-                  }`}
-                >
+              <CardContent className="pt-4">
+                <div className="p-4 md:p-6 rounded-3xl border border-amber-900/10 dark:border-amber-800/40 bg-amber-50/50 dark:bg-[#1c140f]/70 backdrop-blur-md overflow-x-auto shadow-inner">
                   <div className="min-w-[720px]">
-                    <div
-                      className={`flex text-[11px] font-bold mb-2 pl-7 ${
-                        isDarkMode ? "text-[#c2a293]" : "text-[#6e4e3d]"
-                      }`}
-                    >
+                    <div className="flex text-[11px] font-bold mb-3 pl-7 text-amber-800/80 dark:text-amber-400 uppercase tracking-wider">
                       {monthsHeader.map((m, idx) => (
                         <div
                           key={`${m.name}-${idx}`}
@@ -1092,17 +751,13 @@ export default function Dashboard() {
                     </div>
 
                     <div className="flex gap-2">
-                      <div
-                        className={`flex flex-col justify-between text-[10px] font-bold py-1 ${
-                          isDarkMode ? "text-[#a38272]" : "text-[#785948]"
-                        }`}
-                      >
+                      <div className="flex flex-col justify-between text-[10px] font-bold py-1 text-amber-800/80 dark:text-amber-400 uppercase">
                         <span>Mon</span>
                         <span>Wed</span>
                         <span>Fri</span>
                       </div>
 
-                      <div className="grid grid-rows-7 grid-flow-col gap-[3px] flex-1">
+                      <div className="grid grid-rows-7 grid-flow-col gap-[4px] flex-1">
                         {Array.from({ length: 7 }).map((_, rowIndex) =>
                           Array.from({ length: 53 }).map((_, colIndex) => {
                             const dayData = calendarGrid[rowIndex][colIndex];
@@ -1110,7 +765,7 @@ export default function Dashboard() {
                               return (
                                 <div
                                   key={`empty-${rowIndex}-${colIndex}`}
-                                  className="w-2.5 h-2.5 opacity-0"
+                                  className="w-3 h-3 opacity-0"
                                 />
                               );
 
@@ -1119,7 +774,7 @@ export default function Dashboard() {
                                 key={`${dayData.fullDate}-${rowIndex}-${colIndex}`}
                                 onClick={() => setSelectedDay(dayData)}
                                 title={`${dayData.fullDate}: ${dayData.kg} kg restocked`}
-                                className={`w-2.5 h-2.5 rounded-[2px] border cursor-pointer transition-transform hover:scale-125 focus:outline-none ${getHeatmapColor(
+                                className={`w-3 h-3 rounded-md border cursor-pointer transition-all hover:scale-150 hover:z-20 focus:outline-none ${getHeatmapColor(
                                   dayData.kg,
                                   isDarkMode
                                 )}`}
@@ -1134,117 +789,100 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Analytics & Station Alerts */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-              <Card
-                className={`lg:col-span-2 rounded-2xl border ${
-                  isDarkMode
-                    ? "border-[#382013] bg-[#261309]"
-                    : "border-[#ebdcd0] bg-white"
-                }`}
-              >
+            {/* Analytics & Station Alerts Matching Target Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card className="lg:col-span-2 rounded-3xl border border-amber-900/15 dark:border-amber-800/50 bg-white dark:bg-[#241a14]/80 backdrop-blur-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <div>
-                    <CardTitle
-                      className={`text-base font-extrabold ${
-                        isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"
-                      }`}
-                    >
+                    <CardTitle className="text-base font-bold tracking-tight text-amber-950 dark:text-amber-50">
                       Weekly Stray Visits
                     </CardTitle>
-                    <CardDescription
-                      className={`text-xs font-medium ${
-                        isDarkMode ? "text-[#a38272]" : "text-[#785948]"
-                      }`}
-                    >
+                    <CardDescription className="text-xs text-amber-800/80 dark:text-amber-300 font-medium mt-1">
                       Motion events logged by PawGuard PIR sensors
                     </CardDescription>
                   </div>
-                  <Badge
-                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
-                      isDarkMode
-                        ? "bg-[#382013] text-amber-300"
-                        : "bg-[#f8efe6] text-[#6e4e3d]"
-                    }`}
-                  >
+                  <Badge className="px-3 py-1 text-xs font-semibold rounded-full bg-amber-600/15 text-amber-900 dark:text-amber-200 border border-amber-600/30 shadow-none">
                     7-Day Overview
                   </Badge>
                 </CardHeader>
-                <CardContent className="h-56 w-full pt-4">
+                <CardContent className="h-64 w-full pt-4">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={analytics.weeklyVisits}>
+                    <AreaChart data={analytics.weeklyVisits}>
+                      <defs>
+                        <linearGradient id="visitGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#d97706" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="#d97706" stopOpacity={0.0} />
+                        </linearGradient>
+                      </defs>
                       <XAxis
                         dataKey="day"
-                        stroke={isDarkMode ? "#a38272" : "#785948"}
+                        stroke="currentColor"
+                        className="text-amber-800/80 dark:text-amber-300"
                         fontSize={11}
                         fontWeight="700"
                         axisLine={false}
                         tickLine={false}
+                        dy={8}
                       />
                       <YAxis
-                        stroke={isDarkMode ? "#a38272" : "#785948"}
+                        stroke="currentColor"
+                        className="text-amber-800/80 dark:text-amber-300"
                         fontSize={11}
                         fontWeight="700"
                         axisLine={false}
                         tickLine={false}
+                        ticks={[0, 9, 18, 27, 36]}
+                        domain={[0, 36]}
+                        dx={-8}
                       />
                       <Tooltip
-                        cursor={{ fill: isDarkMode ? "#382013" : "#fbf4eb" }}
+                        cursor={{ stroke: "#d97706", strokeWidth: 1, strokeDasharray: "4 4" }}
                         contentStyle={{
-                          backgroundColor: isDarkMode ? "#1d1009" : "#ffffff",
-                          borderRadius: "10px",
-                          borderColor: "#d97706",
-                          color: isDarkMode ? "#fff1e6" : "#2e170a",
+                          backgroundColor: isDarkMode ? "hsl(25 35% 12% / 0.95)" : "hsl(35 40% 96% / 0.95)",
+                          backdropFilter: "blur(12px)",
+                          borderRadius: "16px",
+                          border: "1px solid rgba(217, 119, 6, 0.3)",
+                          boxShadow: "0 20px 25px -5px rgb(0 0 / 0.1)",
+                          color: "currentColor",
+                          fontSize: "12px",
+                          fontWeight: "bold",
                         }}
                       />
-                      <Bar
+                      <Area
+                        type="monotone"
                         dataKey="visits"
-                        fill={isDarkMode ? "#d97706" : "#381c0d"}
-                        radius={[6, 6, 0, 0]}
+                        stroke="#d97706"
+                        strokeWidth={3}
+                        fillOpacity={1}
+                        fill="url(#visitGradient)"
                       />
-                    </BarChart>
+                    </AreaChart>
                   </ResponsiveContainer>
                 </CardContent>
               </Card>
 
-              <Card
-                className={`rounded-2xl border ${
-                  isDarkMode
-                    ? "border-[#382013] bg-[#261309]"
-                    : "border-[#ebdcd0] bg-white"
-                }`}
-              >
+              <Card className="rounded-3xl border border-amber-900/15 dark:border-amber-800/50 bg-white dark:bg-[#241a14]/80 backdrop-blur-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 flex flex-col justify-between">
                 <CardHeader className="pb-3">
-                  <div className="flex items-center gap-2">
-                    <BellRing className="w-4 h-4 text-amber-600" />
-                    <CardTitle
-                      className={`text-base font-extrabold ${
-                        isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"
-                      }`}
-                    >
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 rounded-2xl border border-amber-600/30 bg-amber-600/15 text-amber-800 dark:text-amber-300">
+                      <BellRing className="w-4 h-4" />
+                    </div>
+                    <CardTitle className="text-base font-bold tracking-tight text-amber-950 dark:text-amber-50">
                       Station Alerts
                     </CardTitle>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-3 pb-6">
                   {MOCK_ALERTS.map((alert) => (
                     <div
                       key={alert.id}
-                      className={`p-3 rounded-xl border text-xs space-y-1 ${
-                        isDarkMode
-                          ? "bg-[#1f0e06] border-[#3d2315] text-[#fceee6]"
-                          : "bg-[#fdf8f3] border-[#f2e3d8] text-[#3e2314]"
-                      }`}
+                      className="p-3.5 rounded-2xl border border-amber-900/10 dark:border-amber-800/40 bg-amber-50/70 dark:bg-[#1c140f]/70 backdrop-blur-md text-xs space-y-1.5 transition-all duration-300 hover:bg-amber-600/15 dark:hover:bg-amber-500/15 hover:border-amber-600/30"
                     >
-                      <div className="flex items-center gap-2 font-black">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
+                      <div className="flex items-center gap-2 font-bold text-amber-950 dark:text-amber-50">
+                        <span className="w-2 h-2 rounded-full bg-amber-600 dark:bg-amber-400 shadow-sm shadow-amber-600" />
                         <span>{alert.title}</span>
                       </div>
-                      <p
-                        className={`pl-3.5 font-medium ${
-                          isDarkMode ? "text-[#a38272]" : "text-[#785948]"
-                        }`}
-                      >
+                      <p className="pl-4 font-medium text-amber-900/80 dark:text-amber-200 leading-relaxed">
                         {alert.description}
                       </p>
                     </div>
@@ -1254,96 +892,53 @@ export default function Dashboard() {
             </div>
           </>
         )}
+        </div>
       </div>
 
       {/* HEATMAP TILE DETAILS MODAL */}
       {selectedDay && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div
-            className={`relative w-full max-w-md rounded-2xl border p-6 shadow-xl space-y-4 ${
-              isDarkMode
-                ? "bg-[#231209] border-[#382013] text-[#fceee6]"
-                : "bg-white border-[#ebdcd0] text-[#331c0e]"
-            }`}
-          >
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md rounded-3xl border border-amber-900/20 dark:border-amber-800/50 bg-white dark:bg-[#241a14]/95 backdrop-blur-2xl p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-200">
             <button
               onClick={() => setSelectedDay(null)}
-              className={`absolute top-4 right-4 p-1 rounded-lg border transition-colors ${
-                isDarkMode
-                  ? "border-[#382013] hover:bg-[#331c0e] text-[#c2a293]"
-                  : "border-[#f4e2d8] hover:bg-[#fbf7f2] text-[#6e4e3d]"
-              }`}
+              className="absolute top-5 right-5 p-2 rounded-2xl border border-amber-900/20 dark:border-amber-800/50 bg-amber-100/60 dark:bg-[#1c140f] hover:bg-amber-600/20 transition-colors text-amber-950 dark:text-amber-100"
             >
               <X className="w-4 h-4" />
             </button>
 
             <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <CalendarIcon className="w-5 h-5 text-amber-600" />
-                <h3
-                  className={`text-lg font-extrabold ${
-                    isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"
-                  }`}
-                >
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-2xl border border-amber-600/30 bg-amber-600/15 text-amber-800 dark:text-amber-300">
+                  <CalendarIcon className="w-4 h-4" />
+                </div>
+                <h3 className="text-lg font-bold tracking-tight text-amber-950 dark:text-amber-50">
                   Restock Details
                 </h3>
               </div>
-              <p
-                className={`text-xs font-semibold ${
-                  isDarkMode ? "text-[#a38272]" : "text-[#785948]"
-                }`}
-              >
+              <p className="text-xs text-amber-800/80 dark:text-amber-300 font-medium pl-9">
                 {selectedDay.fullDate}
               </p>
             </div>
 
-            <div className="space-y-4 py-2">
-              <div
-                className={`p-4 rounded-xl border flex items-center justify-between ${
-                  isDarkMode
-                    ? "bg-[#1a0c06] border-[#382013]"
-                    : "bg-[#fbf7f2] border-[#ebdcd0]"
-                }`}
-              >
+            <div className="space-y-4">
+              <div className="p-4 rounded-2xl border border-amber-900/15 dark:border-amber-800/40 bg-amber-50/70 dark:bg-[#1c140f]/70 backdrop-blur-md flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <p
-                    className={`text-xs font-bold ${
-                      isDarkMode ? "text-[#a38272]" : "text-[#785948]"
-                    }`}
-                  >
+                  <p className="text-xs font-bold uppercase tracking-wider text-amber-800/80 dark:text-amber-300">
                     Amount Restocked
                   </p>
-                  <p
-                    className={`text-2xl font-black ${
-                      isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"
-                    }`}
-                  >
+                  <p className="text-3xl font-black tracking-tight text-amber-950 dark:text-amber-50">
                     {selectedDay.kg}{" "}
-                    <span className="text-sm font-bold text-amber-600">kg</span>
+                    <span className="text-sm font-bold text-amber-700 dark:text-amber-400">kg</span>
                   </p>
                 </div>
-                <Badge
-                  className={`px-3 py-1 font-extrabold text-xs rounded-full ${
-                    selectedDay.kg > 0
-                      ? "bg-amber-600 text-[#fff8f0]"
-                      : isDarkMode
-                      ? "bg-[#382013] text-[#a38272]"
-                      : "bg-[#ebdcd0] text-[#785948]"
-                  }`}
-                >
+                <Badge className="px-3.5 py-1 text-xs font-semibold rounded-full bg-amber-600/15 text-amber-900 dark:text-amber-200 border border-amber-600/30 shadow-none">
                   {selectedDay.kg > 0 ? "Active Restock" : "No Activity"}
                 </Badge>
               </div>
 
-              <div
-                className={`p-3 rounded-xl border text-xs flex items-start gap-2.5 ${
-                  isDarkMode
-                    ? "bg-[#2a160c] border-[#3d2315] text-[#d1b2a3]"
-                    : "bg-[#fffbeb] border-[#fde68a] text-[#5e4334]"
-                }`}
-              >
-                <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                <p className="font-medium leading-relaxed">
+              <div className="p-4 rounded-2xl border border-amber-600/30 bg-amber-600/15 text-xs flex items-start gap-3 text-amber-900 dark:text-amber-200 font-semibold">
+                <Info className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+                <p className="leading-relaxed">
                   {selectedDay.kg > 0
                     ? `Community volunteers replenished ${selectedDay.kg} kg of dry food on this date.`
                     : "No community food restock was recorded on this date."}
@@ -1355,40 +950,25 @@ export default function Dashboard() {
       )}
 
       {/* Public Transparency Footer */}
-      <footer
-        className={`w-full mt-8 py-5 px-4 md:px-8 border-t transition-colors ${
-          isDarkMode
-            ? "border-[#382013] bg-[#170c07] text-[#c2a293]"
-            : "border-[#f2e3d8] bg-[#fbf7f2] text-[#6e4e3d]"
-        }`}
-      >
+      <footer className="w-full mt-12 py-6 px-4 md:px-8 border-t border-amber-900/15 dark:border-amber-800/40 bg-white/60 dark:bg-[#241a14]/60 backdrop-blur-xl transition-colors">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
-          <div className="flex items-center gap-3">
-            <div
-              className={`p-2 rounded-xl ${
-                isDarkMode ? "bg-[#29160c]" : "bg-[#f0e4d8]"
-              }`}
-            >
-              <PawPrint className="w-4 h-4 text-amber-700" />
+          <div className="flex items-center gap-3.5">
+            <div className="p-2.5 rounded-2xl border border-amber-600/30 bg-amber-600/15 text-amber-800 dark:text-amber-300 shadow-sm">
+              <PawPrint className="w-4 h-4" />
             </div>
             <div>
-              <h4
-                className={`font-black text-sm ${
-                  isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"
-                }`}
-              >
+              <h4 className="font-bold tracking-tight text-sm text-amber-950 dark:text-amber-50">
                 StraySafe Public Transparency Initiative
               </h4>
-              <p className="font-semibold">
-                Empowering community animal welfare through IoT monitoring & open
-                telemetry data.
+              <p className="text-amber-800/80 dark:text-amber-300 font-medium">
+                Empowering community animal welfare through IoT monitoring & open telemetry data.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 font-bold">
-            <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
-              <Activity className="w-3.5 h-3.5" /> Public Telemetry Active
+          <div className="flex items-center gap-4 font-bold text-emerald-700 dark:text-emerald-300">
+            <span className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl border border-emerald-500/30 bg-emerald-500/15 shadow-none">
+              <Activity className="w-3.5 h-3.5 animate-pulse" /> Public Telemetry Active
             </span>
           </div>
         </div>

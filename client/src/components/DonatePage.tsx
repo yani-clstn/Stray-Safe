@@ -91,7 +91,7 @@ export const DonatePage: React.FC<DonatePageProps> = ({ isDarkMode }) => {
           <CardHeader>
             <CardTitle className="text-lg font-black flex items-center justify-between">
               <span>Pledge a Food Donation</span>
-              <Badge className="bg-amber-600 text-[#fff8f0] font-extrabold text-xs">
+              <Badge className="bg-amber-600 text-[#fff8f0] font-medium text-xs">
                 In-Kind Only
               </Badge>
             </CardTitle>
@@ -114,7 +114,7 @@ export const DonatePage: React.FC<DonatePageProps> = ({ isDarkMode }) => {
               >
                 <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
                 <h3
-                  className={`text-base font-extrabold ${
+                  className={`text-base font-medium ${
                     isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"
                   }`}
                 >
@@ -131,7 +131,7 @@ export const DonatePage: React.FC<DonatePageProps> = ({ isDarkMode }) => {
                 <Button
                   onClick={handleReset}
                   size="sm"
-                  className="bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-full mt-2"
+                  className="bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-full mt-2"
                 >
                   Submit Another Pledge
                 </Button>
@@ -140,7 +140,7 @@ export const DonatePage: React.FC<DonatePageProps> = ({ isDarkMode }) => {
               <form onSubmit={handleSubmit} className="space-y-4 text-xs">
                 <div>
                   <label
-                    className={`block font-extrabold mb-1 ${
+                    className={`block font-medium mb-1 ${
                       isDarkMode ? "text-[#c2a293]" : "text-[#6e4e3d]"
                     }`}
                   >
@@ -163,7 +163,7 @@ export const DonatePage: React.FC<DonatePageProps> = ({ isDarkMode }) => {
 
                 <div>
                   <label
-                    className={`block font-extrabold mb-1 ${
+                    className={`block font-medium mb-1 ${
                       isDarkMode ? "text-[#c2a293]" : "text-[#6e4e3d]"
                     }`}
                   >
@@ -188,7 +188,7 @@ export const DonatePage: React.FC<DonatePageProps> = ({ isDarkMode }) => {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label
-                      className={`block font-extrabold mb-1 ${
+                      className={`block font-medium mb-1 ${
                         isDarkMode ? "text-[#c2a293]" : "text-[#6e4e3d]"
                       }`}
                     >
@@ -213,7 +213,7 @@ export const DonatePage: React.FC<DonatePageProps> = ({ isDarkMode }) => {
 
                   <div>
                     <label
-                      className={`block font-extrabold mb-1 ${
+                      className={`block font-medium mb-1 ${
                         isDarkMode ? "text-[#c2a293]" : "text-[#6e4e3d]"
                       }`}
                     >
@@ -239,7 +239,7 @@ export const DonatePage: React.FC<DonatePageProps> = ({ isDarkMode }) => {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label
-                      className={`block font-extrabold mb-1 ${
+                      className={`block font-medium mb-1 ${
                         isDarkMode ? "text-[#c2a293]" : "text-[#6e4e3d]"
                       }`}
                     >
@@ -262,7 +262,7 @@ export const DonatePage: React.FC<DonatePageProps> = ({ isDarkMode }) => {
 
                   <div>
                     <label
-                      className={`block font-extrabold mb-1 ${
+                      className={`block font-medium mb-1 ${
                         isDarkMode ? "text-[#c2a293]" : "text-[#6e4e3d]"
                       }`}
                     >
@@ -286,7 +286,7 @@ export const DonatePage: React.FC<DonatePageProps> = ({ isDarkMode }) => {
 
                 <Button
                   type="submit"
-                  className={`w-full h-10 font-bold rounded-xl flex items-center justify-center gap-2 ${
+                  className={`w-full h-10 font-medium rounded-xl flex items-center justify-center gap-2 ${
                     isDarkMode
                       ? "bg-[#d97706] hover:bg-[#b45309] text-[#fff8f0]"
                       : "bg-[#381c0d] hover:bg-[#251208] text-[#fff8f0]"
@@ -311,7 +311,7 @@ export const DonatePage: React.FC<DonatePageProps> = ({ isDarkMode }) => {
           <CardHeader>
             <CardTitle className="text-lg font-black flex items-center justify-between">
               <span>Drop-Off Guidelines</span>
-              <Badge className="bg-amber-600 text-[#fff8f0] font-extrabold text-xs">
+              <Badge className="bg-amber-600 text-[#fff8f0] font-medium text-xs">
                 On Campus
               </Badge>
             </CardTitle>
@@ -335,7 +335,7 @@ export const DonatePage: React.FC<DonatePageProps> = ({ isDarkMode }) => {
                 <PawPrint className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <div>
                   <h4
-                    className={`text-xs font-extrabold ${
+                    className={`text-xs font-medium ${
                       isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"
                     }`}
                   >
@@ -355,7 +355,7 @@ export const DonatePage: React.FC<DonatePageProps> = ({ isDarkMode }) => {
                 <PackageCheck className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <div>
                   <h4
-                    className={`text-xs font-extrabold ${
+                    className={`text-xs font-medium ${
                       isDarkMode ? "text-[#fff1e6]" : "text-[#2e170a]"
                     }`}
                   >
