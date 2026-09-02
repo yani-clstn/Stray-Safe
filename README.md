@@ -2,12 +2,11 @@
 
 > **An IoT-Powered Smart Feeding and Telemetry Monitoring Dashboard for Stray Animal Welfare Stations.**
 
-STRAY SAFE is an end-to-end IoT platform designed to automate, monitor, and manage outdoor stray animal feeding stations in real time. It features an **ESP32 microcontroller** for sensor reading and actuator control, a **Hono / Express backend API**, a **Neon Postgres database**, and a **React + Vite dashboard** with data visualisations and manual hardware control.
+STRAY SAFE is an end-to-end IoT platform designed to automate, monitor, and manage outdoor stray animal feeding stations in real time. It features an **ESP32 microcontroller** for sensor reading and actuator control, a **Hono / Express backend API**, a **Neon Postgres database**, and a **React + Vite dashboard** with data visualisations, manual hardware control, and advanced transparency modules.
 
 ---
 
 ## Architecture & Tech Stack
-
 
 ```
 
@@ -21,9 +20,11 @@ STRAY SAFE is an end-to-end IoT platform designed to automate, monitor, and mana
 │
 [ React + Vite Dashboard ]
 
+
 ```
 
 ### **Hardware & Firmware**
+
 * **Microcontroller:** ESP32 Dev Board (Built-in Wi-Fi)
 * **Firmware:** C++ / Arduino Framework via **PlatformIO**
 * **Sensors:** PIR Motion Sensor (PawGuard), HC-SR04 Ultrasonic ×2 (Food & Water Level), DS3231 RTC, INA219 Power Monitor
@@ -31,6 +32,7 @@ STRAY SAFE is an end-to-end IoT platform designed to automate, monitor, and mana
 * **Power Chain:** Solar Panel + Charge Controller + 12V Li-ion/SLA Battery + Buck Converter (12V → 5V)
 
 ### **Software & Cloud**
+
 * **Frontend:** React 18, Vite, TypeScript, Tailwind CSS, Lucide React, Recharts, TanStack Query
 * **Backend:** Express / Hono, Node.js, TypeScript
 * **Database & ORM:** Neon Postgres (Serverless) with Drizzle ORM
@@ -58,8 +60,11 @@ stray-safe/
 ├── firmware/                 # ESP32 C++ C code (PlatformIO project)
 │   ├── src/
 │   └── platformio.ini
+├── docs/
+│   └── Features_for_Proposal.md # Roadmap and upcoming expansion specs
 ├── vercel.json               # Monorepo Vercel deployment configuration
 └── README.md
+
 
 ```
 
@@ -91,7 +96,7 @@ stray-safe/
 Clone the repository and install dependencies for both `client` and `server`:
 
 ```bash
-git clone [https://github.com/YOUR_USERNAME/stray-safe.git](https://github.com/YOUR_USERNAME/stray-safe.git)
+git clone https://github.com/YOUR_USERNAME/stray-safe.git
 cd stray-safe
 
 # Install server dependencies
@@ -101,6 +106,7 @@ npm install
 # Install client dependencies
 cd ../client
 npm install
+
 
 ```
 
@@ -116,6 +122,7 @@ You will need **two separate terminal windows** running concurrently:
 cd server
 npx tsx watch src/index.ts
 
+
 ```
 
 > Server runs locally on **`http://localhost:3000`**.
@@ -125,6 +132,7 @@ npx tsx watch src/index.ts
 ```bash
 cd client
 npm run dev
+
 
 ```
 
@@ -140,6 +148,7 @@ Create a `.env` file inside the `client/` directory:
 # client/.env
 VITE_API_BASE_URL=http://localhost:3000
 
+
 ```
 
 ---
@@ -148,9 +157,22 @@ VITE_API_BASE_URL=http://localhost:3000
 
 * **Real-Time Telemetry Cards:** Live metrics for Food Hoppers (%), Water Bowls (%), Battery Voltage (V), and Solar Charge Efficiency (%).
 * **Activity Analytics:** 7-day bar charts logging motion-activated stray visits.
+* **Contributions Timeline Page (`ContributionsPage.tsx`):** A Git-inspired activity log and date filter dropdown tracking verified food donations and station restocks.
 * **Alert System:** Real-time system warnings for low water reserves and scheduled feed execution.
 * **Manual Trigger Controls:** On-demand dispensing triggers for feeding mechanisms directly from the dashboard.
 * **Manual Data Refresh:** On-demand fetching with loading state feedback to minimize unnecessary background refetches.
+
+---
+
+## Upcoming Expansion Roadmap (Next Development Phase)
+
+As detailed in `docs/Features_for_Proposal.md`, the platform is expanding to include advanced transparency and community-driven modules:
+
+* **Manual Issue Reporting & Public Actions:** Community issue flagging (jams, dirty water, injured strays) routed straight to the admin queue.
+* **Proof-of-Restock Photo Vault:** Image-upload verification logs tied to external object storage buckets (Supabase/Cloudinary) and audited via Neon Postgres.
+* **Live Feeder Telemetry Audit Trail:** Append-only hardware logs tracking exact dispense amounts, trigger sources, and battery voltages.
+* **Dynamic Donor Leaderboard:** Real-time SQL aggregation queries (`SUM`, `GROUP BY`) tracking top contributors by kilograms donated.
+* **Station Financial & Supply Burndown Graph:** Predictive runway calculations mapping current inventory against consumption rates to prevent stockouts.
 
 ---
 
@@ -164,9 +186,8 @@ This repository is configured to deploy as a unified monorepo on **Vercel**.
 
 ---
 
-
 ## Academic Credit & License
 
-This repository is developed as a final project requirement for **COSC 111B - Internet of Things**. 
+This repository is developed as a final project requirement for **COSC 111B - Internet of Things**.
 
 All rights reserved. Released for academic evaluation and non-commercial educational purposes.
