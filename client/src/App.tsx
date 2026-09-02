@@ -20,7 +20,6 @@ import {
   LayoutDashboard,
   Menu,
   ChevronDown,
-  Sparkles,
   ShieldCheck,
   Zap,
   Info,
@@ -221,7 +220,7 @@ const MOCK_CONTRIBUTION_LOGS = [
   },
 ];
 
-function ContributionsPage({ isDarkMode }: { isDarkMode: boolean }) {
+function ContributionsPage() {
   const [selectedDateFilter, setSelectedDateFilter] = useState<string>("All Time");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -580,7 +579,7 @@ export default function Dashboard() {
         {currentPage === "donate" ? (
           <DonatePage isDarkMode={isDarkMode} />
         ) : currentPage === "contributions" ? (
-          <ContributionsPage isDarkMode={isDarkMode} />
+          <ContributionsPage />
         ) : (
           <>
             {/* Live Weather Risk Monitor Banner with Card Hover Effect */}
