@@ -23,6 +23,7 @@ import {
   ShieldCheck,
   Zap,
   Info,
+  Clock,
 } from "lucide-react";
 import {
   AreaChart,
@@ -150,6 +151,7 @@ const MOCK_STATION = {
   batteryPercentage: 92,
   solarVoltage: 12.6,
   status: "online",
+  operationHours: "6:00 AM – 6:00 PM",
 };
 
 const MOCK_ANALYTICS = {
@@ -363,6 +365,10 @@ export default function Dashboard() {
   });
 
   const { calendarGrid, monthsHeader } = generateGithubCalendarData();
+
+  // Compute station open/closed status based on campus operation hours (6:00 AM - 6:00 PM)
+  const currentHour = new Date().getHours();
+  const isStationOpen = currentHour >= 6 && currentHour < 18;
 
   useEffect(() => {
     if (isDarkMode) {
@@ -582,6 +588,45 @@ export default function Dashboard() {
           <ContributionsPage />
         ) : (
           <>
+            {/* Campus Operation Hours & Station Open/Closed Status Card */}
+            <Card className="rounded-3xl border border-amber-900/15 dark:border-amber-800/50 bg-white dark:bg-[#241a14]/80 backdrop-blur-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 overflow-hidden">
+              <CardContent className="p-5 md:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="p-3 rounded-2xl border border-amber-600/30 bg-amber-600/15 text-amber-800 dark:text-amber-300">
+                    <Clock className="w-5 h-5 shrink-0" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-bold tracking-tight text-amber-950 dark:text-amber-50">
+                        Campus Operation Hours
+                      </h3>
+                      <span className="text-xs font-semibold text-amber-800/80 dark:text-amber-300">
+                        ({station.operationHours})
+                      </span>
+                    </div>
+                    <p className="text-xs text-amber-800/80 dark:text-amber-300 font-medium mt-0.5">
+                      {isStationOpen
+                        ? "Station is currently active and open for automated dispensing & student access."
+                        : "Station is currently closed for the night (after-hours standby mode)."}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5 self-end sm:self-center">
+                  <Badge className={`px-4 py-1.5 text-xs font-bold rounded-full shadow-none border ${
+                    isStationOpen
+                      ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30"
+                      : "bg-amber-600/20 text-amber-800 dark:text-amber-300 border-amber-600/40"
+                  }`}>
+                    <span className={`w-2 h-2 rounded-full mr-2 inline-block ${
+                      isStationOpen ? "bg-emerald-500 animate-pulse" : "bg-amber-600 dark:bg-amber-400"
+                    }`} />
+                    {isStationOpen ? "Station OPEN" : "Station CLOSED"}
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Live Weather Risk Monitor Banner with Card Hover Effect */}
             <Card className={`rounded-3xl border backdrop-blur-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 overflow-hidden ${
               weather.isRainy
@@ -756,7 +801,7 @@ export default function Dashboard() {
                         <span>Fri</span>
                       </div>
 
-                      <div className="grid grid-rows-7 grid-flow-col gap-[4px] flex-1">
+                      <div className="contrib-grid flex-1">
                         {Array.from({ length: 7 }).map((_, rowIndex) =>
                           Array.from({ length: 53 }).map((_, colIndex) => {
                             const dayData = calendarGrid[rowIndex][colIndex];
