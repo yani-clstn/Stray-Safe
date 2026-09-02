@@ -4,32 +4,35 @@
 
 @layer base {
   :root {
-    --background: 40 60% 98%;      /* Soft cream background */
-    --foreground: 25 60% 18%;      /* Deep chocolate brown text */
-    
-    --card: 40 50% 96%;            /* Warm card background */
-    --card-foreground: 25 60% 18%; /* Dark brown text inside cards */
-    
-    --primary: 43 96% 56%;         /* Bright warm yellow (#F2B824) */
-    --primary-foreground: 25 65% 15%; /* Contrast dark brown text on yellow */
-    
-    --secondary: 25 55% 24%;       /* Warm chocolate brown (#5C3112) */
-    --secondary-foreground: 40 60% 98%;
-    
-    --border: 40 30% 88%;          /* Subtle warm border */
-    --ring: 43 96% 56%;
+    --background: 40 60% 98%;         /* Light cream background */
+    --foreground: 25 70% 12%;         /* Ultra-dark brown text (#311807) */
+
+    --card: 0 0% 100%;                /* Pure white cards for maximum readability */
+    --card-foreground: 25 70% 12%;    /* Ultra-dark brown card text */
+
+    --primary: 25 85% 35%;            /* Deep, readable amber-brown (#A43E08) */
+    --primary-foreground: 40 60% 98%;
+
+    --muted: 35 30% 92%;
+    --muted-foreground: 25 45% 25%;   /* Dark secondary text (#5D3216) */
+
+    --border: 35 40% 80%;             /* Clear, dark borders */
+    --ring: 25 85% 35%;
   }
 
   .dark {
-    --background: 25 50% 10%;      /* Dark chocolate background */
-    --foreground: 40 60% 95%;      /* Cream text */
-    
-    --card: 25 45% 14%;            /* Slightly lighter dark brown cards */
-    --card-foreground: 40 60% 95%;
-    
-    --primary: 43 96% 56%;         /* Bright yellow highlight */
+    --background: 25 50% 8%;          /* Dark chocolate background */
+    --foreground: 40 60% 95%;         /* Very light cream text */
+
+    --card: 25 45% 12%;               /* Dark card background */
+    --card-foreground: 40 60% 95%;    /* Bright text inside dark cards */
+
+    --primary: 43 96% 56%;            /* Vibrant yellow for dark mode buttons */
     --primary-foreground: 25 65% 10%;
-    
+
+    --muted: 25 35% 20%;
+    --muted-foreground: 40 30% 75%;
+
     --border: 25 35% 22%;
     --ring: 43 96% 56%;
   }
